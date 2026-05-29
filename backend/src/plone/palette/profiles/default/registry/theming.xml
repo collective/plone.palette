@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<registry xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+          i18n:domain="plone.palette">
+
+  <record name="plone.palette.primary_color"
+          interface="plone.palette.interfaces.IPaletteSettings"
+          field="primary_color">
+    <value>#0d6efd</value>
+  </record>
+
+  <record name="plone.palette.secondary_color"
+          interface="plone.palette.interfaces.IPaletteSettings"
+          field="secondary_color">
+    <value>#6c757d</value>
+  </record>
+
+  <record name="plone.palette.success_color"
+          interface="plone.palette.interfaces.IPaletteSettings"
+          field="success_color">
+    <value>#198754</value>
+  </record>
+
+  <record name="plone.palette.danger_color"
+          interface="plone.palette.interfaces.IPaletteSettings"
+          field="danger_color">
+    <value>#dc3545</value>
+  </record>
+
+  <record name="plone.palette.warning_color"
+          interface="plone.palette.interfaces.IPaletteSettings"
+          field="warning_color">
+    <value>#ffc107</value>
+  </record>
+
+  <record name="plone.palette.info_color"
+          interface="plone.palette.interfaces.IPaletteSettings"
+          field="info_color">
+    <value>#0dcaf0</value>
+  </record>
+
+  <record name="plone.palette.body_font_size"
+          interface="plone.palette.interfaces.IPaletteSettings"
+          field="body_font_size">
+    <value>1</value>
+  </record>
+
+  <!-- Typography / Google Fonts -->
+  <record name="plone.palette.google_font_family">
+    <field type="plone.registry.field.TextLine"><title>Google Font family</title><required>False</required></field>
+    <value></value>
+  </record>
+  <record name="plone.palette.google_fonts_api_key">
+    <field type="plone.registry.field.TextLine"><title>Google Fonts API key</title><required>False</required></field>
+    <value></value>
+  </record>
+
+  <!-- Borders -->
+  <record name="plone.palette.border_width">
+    <field type="plone.registry.field.TextLine"><title>Border width</title><required>False</required></field>
+    <value>1</value>
+  </record>
+  <record name="plone.palette.border_color">
+    <field type="plone.registry.field.TextLine"><title>Border color</title><required>False</required></field>
+    <value>#dee2e6</value>
+  </record>
+  <record name="plone.palette.border_radius">
+    <field type="plone.registry.field.TextLine"><title>Border radius</title><required>False</required></field>
+    <value>0.375</value>
+  </record>
+  <record name="plone.palette.border_radius_sm">
+    <field type="plone.registry.field.TextLine"><title>Border radius SM</title><required>False</required></field>
+    <value>0.25</value>
+  </record>
+  <record name="plone.palette.border_radius_lg">
+    <field type="plone.registry.field.TextLine"><title>Border radius LG</title><required>False</required></field>
+    <value>0.5</value>
+  </record>
+  <record name="plone.palette.border_radius_xl">
+    <field type="plone.registry.field.TextLine"><title>Border radius XL</title><required>False</required></field>
+    <value>1</value>
+  </record>
+  <record name="plone.palette.border_radius_xxl">
+    <field type="plone.registry.field.TextLine"><title>Border radius XXL</title><required>False</required></field>
+    <value>2</value>
+  </record>
+  <record name="plone.palette.box_shadow">
+    <field type="plone.registry.field.TextLine"><title>Box shadow</title><required>False</required></field>
+    <value>0 .5rem 1rem rgba(0,0,0,.15)</value>
+  </record>
+  <record name="plone.palette.box_shadow_sm">
+    <field type="plone.registry.field.TextLine"><title>Box shadow SM</title><required>False</required></field>
+    <value>0 .125rem .25rem rgba(0,0,0,.075)</value>
+  </record>
+  <record name="plone.palette.box_shadow_lg">
+    <field type="plone.registry.field.TextLine"><title>Box shadow LG</title><required>False</required></field>
+    <value>0 1rem 3rem rgba(0,0,0,.175)</value>
+  </record>
+
+  <!-- Typography extras -->
+  <record name="plone.palette.body_color">
+    <field type="plone.registry.field.TextLine"><title>Body color</title><required>False</required></field>
+    <value>#212529</value>
+  </record>
+  <record name="plone.palette.body_bg">
+    <field type="plone.registry.field.TextLine"><title>Body background</title><required>False</required></field>
+    <value>#ffffff</value>
+  </record>
+  <record name="plone.palette.heading_color">
+    <field type="plone.registry.field.TextLine"><title>Heading color</title><required>False</required></field>
+    <value>#212529</value>
+  </record>
+  <record name="plone.palette.body_font_weight">
+    <field type="plone.registry.field.TextLine"><title>Body font weight</title><required>False</required></field>
+    <value>400</value>
+  </record>
+  <record name="plone.palette.body_line_height">
+    <field type="plone.registry.field.TextLine"><title>Body line height</title><required>False</required></field>
+    <value>1.5</value>
+  </record>
+
+  <!-- Navbar & Footer (Barceloneta-specific) -->
+  <record name="plone.palette.navbar_bg">
+    <field type="plone.registry.field.TextLine"><title>Navbar background</title><required>False</required></field>
+    <value>#007bb1</value>
+  </record>
+  <record name="plone.palette.footer_bg">
+    <field type="plone.registry.field.TextLine"><title>Footer background</title><required>False</required></field>
+    <value>#212529</value>
+  </record>
+  <record name="plone.palette.footer_color">
+    <field type="plone.registry.field.TextLine"><title>Footer text color</title><required>False</required></field>
+    <value>#dee2e6</value>
+  </record>
+
+  <!-- Plone UI colors — inline <field> so import succeeds before a server restart -->
+  <record name="plone.palette.plone_link_color_on_dark">
+    <field type="plone.registry.field.TextLine"><title>Link color on dark</title><required>False</required></field>
+    <value>#16a1e3</value>
+  </record>
+  <record name="plone.palette.plone_link_color_on_grey">
+    <field type="plone.registry.field.TextLine"><title>Link color on grey</title><required>False</required></field>
+    <value>#086ca3</value>
+  </record>
+  <record name="plone.palette.plone_portlet_list_hover_bg">
+    <field type="plone.registry.field.TextLine"><title>Portlet list hover bg</title><required>False</required></field>
+    <value>#fcfcfd</value>
+  </record>
+  <record name="plone.palette.plone_portlet_footer_bg">
+    <field type="plone.registry.field.TextLine"><title>Portlet footer bg</title><required>False</required></field>
+    <value>#fcfcfd</value>
+  </record>
+  <record name="plone.palette.plone_portlet_list_bullet">
+    <field type="plone.registry.field.TextLine"><title>Portlet list bullet</title><required>False</required></field>
+    <value>#64bee8</value>
+  </record>
+
+  <!-- Workflow state colors -->
+  <record name="plone.palette.state_draft_color">
+    <field type="plone.registry.field.TextLine"><title>Draft state color</title><required>False</required></field>
+    <value>#fab82a</value>
+  </record>
+  <record name="plone.palette.state_pending_color">
+    <field type="plone.registry.field.TextLine"><title>Pending state color</title><required>False</required></field>
+    <value>#ccd111</value>
+  </record>
+  <record name="plone.palette.state_private_color">
+    <field type="plone.registry.field.TextLine"><title>Private state color</title><required>False</required></field>
+    <value>#c4183c</value>
+  </record>
+  <record name="plone.palette.state_internal_color">
+    <field type="plone.registry.field.TextLine"><title>Internal state color</title><required>False</required></field>
+    <value>#fab82a</value>
+  </record>
+  <record name="plone.palette.state_internally_published_color">
+    <field type="plone.registry.field.TextLine"><title>Internally published color</title><required>False</required></field>
+    <value>#883dfa</value>
+  </record>
+
+  <record name="plone.palette.enabled_properties"
+          interface="plone.palette.interfaces.IPaletteSettings"
+          field="enabled_properties">
+    <value>
+      <element>enable_caret</element>
+      <element>enable_rounded</element>
+      <element>enable_transitions</element>
+      <element>enable_reduced_motion</element>
+      <element>enable_smooth_scroll</element>
+      <element>enable_grid_classes</element>
+      <element>enable_container_classes</element>
+      <element>enable_button_pointers</element>
+      <element>enable_rfs</element>
+      <element>enable_validation_icons</element>
+      <element>enable_negative_margins</element>
+      <element>enable_deprecation_messages</element>
+    </value>
+  </record>
+
+  <record name="plone.palette.custom_css"
+          interface="plone.palette.interfaces.IPaletteSettings"
+          field="custom_css">
+    <value></value>
+  </record>
+
+</registry>

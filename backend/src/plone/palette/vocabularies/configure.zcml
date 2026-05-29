@@ -1,0 +1,9 @@
+<configure xmlns="http://namespaces.zope.org/zope">
+
+  <utility
+      component=".google_fonts.GoogleFontsVocabularyFactory"
+      name="plone.palette.GoogleFonts"
+      provides="zope.schema.interfaces.IVocabularyFactory"
+      />
+
+</configure>

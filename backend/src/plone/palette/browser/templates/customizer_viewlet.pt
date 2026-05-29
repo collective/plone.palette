@@ -1,0 +1,10 @@
+<tal:block xmlns:tal="http://xml.zope.org/namespaces/tal"
+          xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+          i18n:domain="plone.palette"
+          tal:condition="view/available"
+          tal:define="portal_url context/@@plone_portal_state/portal_url;
+                      custom_css view/custom_css">
+<style id="customizer-styles"></style>
+<!-- editor styles -->
+<style id="editor-styles"></style>
+</tal:block>

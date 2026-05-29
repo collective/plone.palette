@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<object name="portal_actions" meta_type="Plone Actions Tool"
+        xmlns:i18n="http://xml.zope.org/namespaces/i18n">
+
+  <action-provider name="portal_actions" />
+
+  <!-- Add "Theme Customizer" to the existing object_buttons category.
+       collective.sidebar renders this category in the "Actions" section.
+       The <property name="modal"> value is passed verbatim as
+       data-pat-plone-modal, giving the link class="pat-plone-modal". -->
+  <object name="object" meta_type="CMF Action Category" purge="false">
+
+    <object name="palette_customizer" meta_type="CMF Action"
+            i18n:domain="plone.palette">
+      <property name="title" i18n:translate="action_theme_customizer">Theming</property>
+      <property name="description" i18n:translate=""></property>
+      <property name="url_expr">string:${portal_url}/@@palette-customizer?ajax_load=1&amp;ajax_include_head=0</property>
+      <property name="link_target"></property>
+      <property name="icon_expr">string:display</property>
+      <property name="available_expr"></property>
+      <!-- Settings for pat-plone-modal — collective.sidebar checks action.get('modal')
+           and adds class="pat-plone-modal" + data-pat-plone-modal when present. -->
+      <property name="modal" type="string">{"modalSizeClass": "modal-md","backdropOptions":{"opacity": "0.1"}}</property>
+      <property name="permissions">
+        <element value="Manage portal" />
+      </property>
+      <property name="visible">True</property>
+    </object>
+
+  </object>
+
+</object>

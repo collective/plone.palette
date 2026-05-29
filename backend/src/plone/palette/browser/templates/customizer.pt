@@ -1,0 +1,499 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      i18n:domain="plone.palette"
+      metal:use-macro="context/main_template/macros/master">
+
+<metal:fill fill-slot="content-title">
+    <h1 class="documentFirstHeading">Plone Palette</h1>
+</metal:fill>
+<metal:fill fill-slot="content-description"/>
+
+<metal:fill fill-slot="content-core">
+
+<div id="palette-customizer-content">
+
+  <div id="form-feedback"></div>
+
+  <form id="palette-customizer-form"
+        tal:attributes="action string:${context/absolute_url}/@@palette-save"
+        method="POST"
+        class="pat-autosubmit pat-inject"
+        data-pat-autosubmit="delay: 800"
+        data-pat-inject="target: #form-feedback">
+
+    <input type="hidden" name="_authenticator"
+           tal:attributes="value context/@@authenticator/token" />
+
+    <!-- Tab nav -->
+    <ul class="nav nav-tabs mb-3" id="customizer-tabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="tab-colors-btn"
+                data-bs-toggle="tab" data-bs-target="#tab-colors"
+                type="button" role="tab" aria-controls="tab-colors" aria-selected="true">
+          Colors
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-typography-btn"
+                data-bs-toggle="tab" data-bs-target="#tab-typography"
+                type="button" role="tab" aria-controls="tab-typography" aria-selected="false">
+          Typography
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-borders-btn"
+                data-bs-toggle="tab" data-bs-target="#tab-borders"
+                type="button" role="tab" aria-controls="tab-borders" aria-selected="false">
+          Borders
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-navbar-footer-btn"
+                data-bs-toggle="tab" data-bs-target="#tab-navbar-footer"
+                type="button" role="tab" aria-controls="tab-navbar-footer" aria-selected="false">
+          Navbar &amp; Footer
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-properties-btn"
+                data-bs-toggle="tab" data-bs-target="#tab-properties"
+                type="button" role="tab" aria-controls="tab-properties" aria-selected="false">
+          Properties
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-css-btn"
+                data-bs-toggle="tab" data-bs-target="#tab-css"
+                type="button" role="tab" aria-controls="tab-css" aria-selected="false">
+          CSS
+        </button>
+      </li>
+    </ul>
+
+    <div class="tab-content" id="customizer-tab-content">
+
+      <!-- ── Colors ──────────────────────────────────────────────── -->
+      <div class="tab-pane fade show active" id="tab-colors"
+           role="tabpanel" aria-labelledby="tab-colors-btn">
+
+        <p class="text-muted small mb-2">Bootstrap theme colors</p>
+        <div class="row row-cols-3 g-3 mb-4">
+          <tal:colors tal:repeat="item python:[
+              ('primary',   'Primary',   view.primary_color,   '--bs-primary'),
+              ('secondary', 'Secondary', view.secondary_color, '--bs-secondary'),
+              ('success',   'Success',   view.success_color,   '--bs-success'),
+              ('danger',    'Danger',    view.danger_color,    '--bs-danger'),
+              ('warning',   'Warning',   view.warning_color,   '--bs-warning'),
+              ('info',      'Info',      view.info_color,      '--bs-info'),
+            ]">
+            <tal:define define="cid python:item[0]; clabel python:item[1]; cval python:item[2]; cssvar python:item[3]">
+            <div class="col">
+              <label class="form-label small mb-1"
+                     tal:attributes="for string:th-${cid}"
+                     tal:content="clabel">Color</label>
+              <div style="display:flex; gap:.25rem; align-items:center;">
+                <input type="color"
+                       tal:attributes="id string:th-${cid};
+                                       name string:${cid}_color;
+                                       value cval;
+                                       data-css-var cssvar"
+                       style="width:2.5rem; height:2rem; padding:.15rem; cursor:pointer;
+                              border:1px solid #ced4da; border-radius:.25rem;" />
+                <input type="text"
+                       tal:attributes="id string:th-${cid}-text; value cval"
+                       class="form-control form-control-sm"
+                       style="max-width:80px; font-family:monospace; font-size:.8rem;"
+                       placeholder="#000000" />
+              </div>
+            </div>
+            </tal:define>
+          </tal:colors>
+        </div>
+
+        <p class="text-muted small mb-2">Plone UI colors</p>
+        <div class="row row-cols-3 g-3 mb-4">
+          <tal:pcolors tal:repeat="item view/plone_ui_colors">
+            <tal:define define="fname python:item[0]; cssvar python:item[1]; clabel python:item[2]; cval python:item[3]">
+            <div class="col">
+              <label class="form-label small mb-1"
+                     tal:attributes="for string:th-plone-${fname}"
+                     tal:content="clabel">Color</label>
+              <div style="display:flex; gap:.25rem; align-items:center;">
+                <input type="color"
+                       tal:attributes="id string:th-plone-${fname};
+                                       name fname;
+                                       value cval;
+                                       data-css-var cssvar"
+                       style="width:2.5rem; height:2rem; padding:.15rem; cursor:pointer;
+                              border:1px solid #ced4da; border-radius:.25rem;" />
+                <input type="text"
+                       tal:attributes="id string:th-plone-${fname}-text; value cval"
+                       class="form-control form-control-sm"
+                       style="max-width:80px; font-family:monospace; font-size:.8rem;"
+                       placeholder="#000000" />
+              </div>
+            </div>
+            </tal:define>
+          </tal:pcolors>
+        </div>
+
+        <p class="text-muted small mb-2">Workflow state colors</p>
+        <div class="row row-cols-3 g-3 mb-2">
+          <tal:scolors tal:repeat="item view/state_colors">
+            <tal:define define="fname python:item[0]; cssvar python:item[1]; clabel python:item[2]; cval python:item[3]">
+            <div class="col">
+              <label class="form-label small mb-1"
+                     tal:attributes="for string:th-state-${fname}"
+                     tal:content="clabel">Color</label>
+              <div style="display:flex; gap:.25rem; align-items:center;">
+                <input type="color"
+                       tal:attributes="id string:th-state-${fname};
+                                       name fname;
+                                       value cval;
+                                       data-css-var cssvar"
+                       style="width:2.5rem; height:2rem; padding:.15rem; cursor:pointer;
+                              border:1px solid #ced4da; border-radius:.25rem;" />
+                <input type="text"
+                       tal:attributes="id string:th-state-${fname}-text; value cval"
+                       class="form-control form-control-sm"
+                       style="max-width:80px; font-family:monospace; font-size:.8rem;"
+                       placeholder="#000000" />
+              </div>
+            </div>
+            </tal:define>
+          </tal:scolors>
+        </div>
+
+      </div>
+
+      <!-- ── Typography ──────────────────────────────────────────── -->
+      <div class="tab-pane fade" id="tab-typography"
+           role="tabpanel" aria-labelledby="tab-typography-btn">
+
+        <!-- Google Font -->
+        <div class="mb-4">
+          <label class="form-label small mb-1" for="th-google-font">
+            Google Font
+            <span class="text-muted fw-normal" style="font-size:.75rem;">(--bs-body-font-family)</span>
+          </label>
+          <select id="th-google-font"
+                  name="google_font_family"
+                  class="form-select form-select-sm">
+            <tal:opts tal:repeat="term view/google_fonts_terms">
+              <tal:define define="tval python:term[0]; ttitle python:term[1]">
+              <option tal:attributes="value tval;
+                                      selected python:tval == view.google_font_family"
+                      tal:content="ttitle">Font</option>
+              </tal:define>
+            </tal:opts>
+          </select>
+          <div class="form-text">
+            Configure your API key in <code>plone.palette.google_fonts_api_key</code>
+            to unlock the full catalogue. Without a key a curated list of
+            <tal:n tal:replace="python:len(view.google_fonts_terms) - 1" /> fonts is available.
+          </div>
+        </div>
+
+        <!-- Body & Heading colors -->
+        <p class="text-muted small mb-2">Body &amp; Headings</p>
+        <div class="row row-cols-3 g-3 mb-4">
+          <tal:typcols tal:repeat="item python:[
+              ('body_color',    'Body text',     view.body_color,    '--bs-body-color'),
+              ('body_bg',       'Body bg',       view.body_bg,       '--bs-body-bg'),
+              ('heading_color', 'Heading color', view.heading_color, '--bs-heading-color'),
+            ]">
+            <tal:define define="fname python:item[0]; clabel python:item[1]; cval python:item[2]; cssvar python:item[3]">
+            <div class="col">
+              <label class="form-label small mb-1"
+                     tal:attributes="for string:th-${fname}"
+                     tal:content="clabel">Color</label>
+              <div style="display:flex; gap:.25rem; align-items:center;">
+                <input type="color"
+                       tal:attributes="id string:th-${fname};
+                                       name fname;
+                                       value cval;
+                                       data-css-var cssvar"
+                       style="width:2.5rem;height:2rem;padding:.1rem .15rem;cursor:pointer;border:1px solid #ced4da;border-radius:.25rem;flex-shrink:0;" />
+                <input type="text"
+                       tal:attributes="id string:th-${fname}-text; value cval"
+                       class="form-control form-control-sm"
+                       style="max-width:90px;font-family:monospace;font-size:.8rem;" />
+              </div>
+            </div>
+            </tal:define>
+          </tal:typcols>
+        </div>
+
+        <!-- Font weight select -->
+        <div class="mb-3">
+          <label class="form-label small mb-1" for="th-body-font-weight">Font weight</label>
+          <select id="th-body-font-weight" name="body_font_weight"
+                  class="form-select form-select-sm"
+                  data-css-var="--bs-body-font-weight"
+                  style="max-width:180px;">
+            <tal:opts tal:repeat="opt python:[('300','Light 300'),('400','Regular 400'),('500','Medium 500'),('600','Semi-bold 600'),('700','Bold 700')]">
+              <option tal:attributes="value python:opt[0]; selected python:opt[0]==view.body_font_weight"
+                      tal:content="python:opt[1]">weight</option>
+            </tal:opts>
+          </select>
+        </div>
+
+        <!-- Line height range -->
+        <div class="mb-4">
+          <label class="form-label small mb-1" for="th-body-line-height">
+            Line height — <span id="th-body-line-height-display" tal:content="view/body_line_height">1.5</span>
+            <span class="text-muted fw-normal" style="font-size:.75rem;">(--bs-body-line-height)</span>
+          </label>
+          <input type="range" id="th-body-line-height" name="body_line_height"
+                 class="form-range" min="1" max="2.5" step="0.1"
+                 data-css-var="--bs-body-line-height"
+                 tal:attributes="value view/body_line_height" />
+        </div>
+
+        <!-- Font size -->
+        <div class="mb-3">
+          <label class="form-label small mb-1" for="th-body-font-size">
+            Body font size —
+            <span id="th-body-font-size-display"
+                  tal:content="view/body_font_size">1</span> rem
+            <span class="text-muted fw-normal" style="font-size:.75rem;">(--bs-body-font-size)</span>
+          </label>
+          <input type="range"
+                 id="th-body-font-size"
+                 name="body_font_size"
+                 class="form-range"
+                 min="0.75" max="1.5" step="0.05"
+                 tal:attributes="value view/body_font_size" />
+        </div>
+
+      </div>
+
+      <!-- ── Borders ────────────────────────────────────────────── -->
+      <div class="tab-pane fade" id="tab-borders" role="tabpanel" aria-labelledby="tab-borders-btn">
+
+        <p class="text-muted small mb-3">Border</p>
+        <div class="row row-cols-2 g-3 mb-4">
+
+          <!-- border-width: number input, px unit -->
+          <div class="col">
+            <label class="form-label small mb-1" for="th-border-width">
+              Border width — <span id="th-border-width-display" tal:content="view/border_width">1</span> px
+            </label>
+            <input type="number" id="th-border-width" name="border_width"
+                   class="form-control form-control-sm"
+                   min="0" max="10" step="1"
+                   data-css-var="--bs-border-width" data-css-unit="px"
+                   tal:attributes="value view/border_width" />
+          </div>
+
+          <!-- border-color: color picker -->
+          <div class="col">
+            <label class="form-label small mb-1" for="th-border-color">Border color</label>
+            <div style="display:flex; gap:.25rem; align-items:center;">
+              <input type="color" id="th-border-color" name="border_color"
+                     data-css-var="--bs-border-color"
+                     style="width:2.5rem;height:2rem;padding:.1rem .15rem;cursor:pointer;border:1px solid #ced4da;border-radius:.25rem;flex-shrink:0;"
+                     tal:attributes="value view/border_color" />
+              <input type="text" id="th-border-color-text" class="form-control form-control-sm"
+                     style="max-width:90px;font-family:monospace;font-size:.8rem;"
+                     tal:attributes="value view/border_color" placeholder="#dee2e6" />
+            </div>
+          </div>
+
+        </div>
+
+        <p class="text-muted small mb-3">Rounded corners <span class="fw-normal">(rem)</span></p>
+        <div class="row row-cols-2 g-3 mb-4">
+
+          <tal:radii tal:repeat="item python:[
+              ('border_radius',     'Base', view.border_radius,     '0', '2',   '0.025', '--bs-border-radius'),
+              ('border_radius_sm',  'SM',   view.border_radius_sm,  '0', '1',   '0.025', '--bs-border-radius-sm'),
+              ('border_radius_lg',  'LG',   view.border_radius_lg,  '0', '2',   '0.025', '--bs-border-radius-lg'),
+              ('border_radius_xl',  'XL',   view.border_radius_xl,  '0', '3',   '0.05',  '--bs-border-radius-xl'),
+              ('border_radius_xxl', 'XXL',  view.border_radius_xxl, '0', '4',   '0.1',   '--bs-border-radius-xxl'),
+            ]">
+            <tal:define define="fname python:item[0]; rlabel python:item[1]; rval python:item[2]; rmin python:item[3]; rmax python:item[4]; rstep python:item[5]; rcssvar python:item[6]">
+            <div class="col">
+              <label class="form-label small mb-1"
+                     tal:attributes="for string:th-${fname}">
+                <tal:replace replace="rlabel"/> —
+                <span tal:attributes="id string:th-${fname}-display"
+                      tal:content="rval">0</span> rem
+              </label>
+              <input type="range"
+                     tal:attributes="id string:th-${fname};
+                                     name fname;
+                                     min rmin; max rmax; step rstep;
+                                     value rval;
+                                     data-css-var rcssvar;
+                                     data-css-unit string:rem"
+                     class="form-range" />
+            </div>
+            </tal:define>
+          </tal:radii>
+
+        </div>
+
+        <p class="text-muted small mb-3">Box shadows <span class="fw-normal">(CSS value or <code>none</code>)</span></p>
+        <div class="row g-3 mb-2">
+          <tal:shadows tal:repeat="item python:[
+              ('box_shadow',    'Default', view.box_shadow),
+              ('box_shadow_sm', 'Small',   view.box_shadow_sm),
+              ('box_shadow_lg', 'Large',   view.box_shadow_lg),
+            ]">
+            <tal:define define="fname python:item[0]; slabel python:item[1]; sval python:item[2];
+                                scssvar python:'--bs-' + fname.replace('_','-')">
+            <div class="col-12">
+              <label class="form-label small mb-1"
+                     tal:attributes="for string:th-${fname}"
+                     tal:content="slabel">Shadow</label>
+              <input type="text"
+                     tal:attributes="id string:th-${fname};
+                                     name fname;
+                                     value sval;
+                                     data-css-var scssvar"
+                     class="form-control form-control-sm"
+                     style="font-family:monospace;font-size:.75rem;" />
+            </div>
+            </tal:define>
+          </tal:shadows>
+        </div>
+
+      </div>
+
+      <!-- ── Properties ──────────────────────────────────────────── -->
+      <div class="tab-pane fade" id="tab-properties"
+           role="tabpanel" aria-labelledby="tab-properties-btn">
+
+        <!-- Hidden sentinel: ensures enabled_properties key is always POSTed
+             even when every checkbox is unchecked. -->
+        <input type="hidden" name="enabled_properties" value="" />
+
+        <div class="pat-checklist"
+             data-pat-checklist="select: .js-select-all; deselect: .js-deselect-all; toggle: .js-toggle-all">
+
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <label class="d-flex align-items-center gap-1 mb-0 text-muted small">
+              <input type="checkbox" class="js-toggle-all form-check-input mt-0" />
+              Toggle all
+            </label>
+            <button type="button" class="btn btn-sm btn-outline-secondary js-select-all">Enable all</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary js-deselect-all">Disable all</button>
+          </div>
+
+          <fieldset class="border-0 p-0 m-0">
+            <tal:props tal:repeat="prop view/bootstrap_properties">
+              <tal:define define="pname python:prop[0]; plabel python:prop[1]; pdefault python:prop[2]">
+              <div class="form-check mb-2">
+                <input class="form-check-input"
+                       type="checkbox"
+                       name="enabled_properties"
+                       tal:attributes="id string:prop-${pname};
+                                       value pname;
+                                       checked python:pname in view.enabled_properties" />
+                <label class="form-check-label" tal:attributes="for string:prop-${pname}">
+                  <span tal:replace="plabel">label</span>
+                  <code class="text-muted ms-1"
+                        style="font-size:.7rem;"
+                        tal:content="python:'$enable-' + pname.replace('_','-').replace('enable-','')">
+                  </code>
+                  <tal:default condition="python:not pdefault">
+                    <span class="badge bg-secondary ms-1" style="font-size:.65rem;">off by default</span>
+                  </tal:default>
+                </label>
+              </div>
+              </tal:define>
+            </tal:props>
+          </fieldset>
+
+        </div>
+      </div>
+
+      <!-- ── Navbar & Footer ────────────────────────────────────── -->
+      <div class="tab-pane fade" id="tab-navbar-footer" role="tabpanel" aria-labelledby="tab-navbar-footer-btn">
+
+        <p class="text-muted small mb-2">Navbar <span class="fw-normal">(Barceloneta: <code>.navbar-barceloneta</code>)</span></p>
+        <div class="row row-cols-2 g-3 mb-4">
+          <div class="col">
+            <label class="form-label small mb-1" for="th-navbar-bg">Background</label>
+            <div style="display:flex; gap:.25rem; align-items:center;">
+              <input type="color" id="th-navbar-bg" name="navbar_bg"
+                     data-css-selector=".navbar-barceloneta" data-css-prop="--bs-navbar-background"
+                     style="width:2.5rem;height:2rem;padding:.1rem .15rem;cursor:pointer;border:1px solid #ced4da;border-radius:.25rem;flex-shrink:0;"
+                     tal:attributes="value view/navbar_bg" />
+              <input type="text" id="th-navbar-bg-text" class="form-control form-control-sm"
+                     style="max-width:90px;font-family:monospace;font-size:.8rem;"
+                     tal:attributes="value view/navbar_bg" />
+            </div>
+          </div>
+        </div>
+
+        <p class="text-muted small mb-2">Footer <span class="fw-normal">(<code>#portal-footer-wrapper</code>)</span></p>
+        <div class="row row-cols-2 g-3 mb-2">
+          <div class="col">
+            <label class="form-label small mb-1" for="th-footer-bg">Background</label>
+            <div style="display:flex; gap:.25rem; align-items:center;">
+              <input type="color" id="th-footer-bg" name="footer_bg"
+                     data-css-selector="#portal-footer-wrapper" data-css-prop="background-color"
+                     style="width:2.5rem;height:2rem;padding:.1rem .15rem;cursor:pointer;border:1px solid #ced4da;border-radius:.25rem;flex-shrink:0;"
+                     tal:attributes="value view/footer_bg" />
+              <input type="text" id="th-footer-bg-text" class="form-control form-control-sm"
+                     style="max-width:90px;font-family:monospace;font-size:.8rem;"
+                     tal:attributes="value view/footer_bg" />
+            </div>
+          </div>
+          <div class="col">
+            <label class="form-label small mb-1" for="th-footer-color">Text color</label>
+            <div style="display:flex; gap:.25rem; align-items:center;">
+              <input type="color" id="th-footer-color" name="footer_color"
+                     data-css-selector="#portal-footer-wrapper" data-css-prop="color"
+                     style="width:2.5rem;height:2rem;padding:.1rem .15rem;cursor:pointer;border:1px solid #ced4da;border-radius:.25rem;flex-shrink:0;"
+                     tal:attributes="value view/footer_color" />
+              <input type="text" id="th-footer-color-text" class="form-control form-control-sm"
+                     style="max-width:90px;font-family:monospace;font-size:.8rem;"
+                     tal:attributes="value view/footer_color" />
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── Custom CSS ───────────────────────────────────────────── -->
+      <div class="tab-pane fade" id="tab-css"
+           role="tabpanel" aria-labelledby="tab-css-btn">
+        <div class="mb-3">
+          <label class="form-label small mb-1" for="palette-custom-css">Custom CSS</label>
+          <textarea id="palette-custom-css"
+                    name="custom_css"
+                    class="pat-code-editor"
+                    rows="400"
+                    placeholder=":root {&#10;  /* additional overrides */&#10;}"
+                    data-pat-code-editor="language: css; theme: dark"
+                    tal:content="view/custom_css"></textarea>
+        </div>
+
+        <!-- Generated CSS — read-only preview -->
+        <div class="mb-2 d-none">
+          <label class="form-label small mb-1" for="palette-generated-css">
+            Generated CSS
+            <span class="text-muted fw-normal" style="font-size:.75rem;">(written to theming registry)</span>
+          </label>
+          <textarea id="palette-generated-css"
+                    class="form-control"
+                    style="font-family:monospace; font-size:.75rem; background:#f8f9fa; resize:vertical;"
+                    rows="8"
+                    readonly="readonly"
+                    tal:content="view/generated_css"></textarea>
+        </div>
+      </div>
+
+    </div><!-- /.tab-content -->
+
+  </form>
+
+</div><!-- /#palette-customizer-content -->
+
+</metal:fill>
+</html>
