@@ -38,6 +38,51 @@
       .map(function(n) { return n.toString(16).padStart(2, "0"); }).join("");
   }
 
+  // ── Bootstrap property CSS maps (mirrors Python _DISABLED_CSS / _ENABLED_CSS) ──
+  // Keyed by $enable-* flag name. Applied in buildCss when a checkbox is toggled.
+
+  var PROPERTY_DEFAULTS = {
+    enable_caret: true, enable_rounded: true, enable_transitions: true,
+    enable_reduced_motion: true, enable_smooth_scroll: true,
+    enable_grid_classes: true, enable_container_classes: true,
+    enable_button_pointers: true, enable_rfs: true,
+    enable_validation_icons: true, enable_negative_margins: true,
+    enable_deprecation_messages: true,
+    enable_shadows: false, enable_gradients: false,
+    enable_cssgrid: false, enable_important_utilities: false
+  };
+
+  var DISABLED_CSS = {
+    enable_caret:
+      ".dropdown-toggle::after, .dropup .dropdown-toggle::after," +
+      ".dropend .dropdown-toggle::after { display: none; }" +
+      " .dropstart .dropdown-toggle::before { display: none; }",
+    enable_rounded:
+      ":root { --bs-border-radius: 0; --bs-border-radius-sm: 0;" +
+      " --bs-border-radius-lg: 0; --bs-border-radius-xl: 0;" +
+      " --bs-border-radius-xxl: 0; --bs-border-radius-pill: 0; }",
+    enable_transitions:
+      "*, *::before, *::after { transition: none !important; animation: none !important; }",
+    enable_smooth_scroll:
+      "html { scroll-behavior: auto !important; }",
+    enable_button_pointers:
+      ".btn:not(:disabled) { cursor: default; }",
+    enable_validation_icons:
+      ".form-control.is-valid, .was-validated .form-control:valid," +
+      ".form-control.is-invalid, .was-validated .form-control:invalid" +
+      " { background-image: none; padding-right: revert; }"
+  };
+
+  var ENABLED_CSS = {
+    enable_shadows:
+      ":root { --bs-box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);" +
+      " --bs-box-shadow-sm: 0 .125rem .25rem rgba(0,0,0,.075);" +
+      " --bs-box-shadow-lg: 0 1rem 3rem rgba(0,0,0,.175);" +
+      " --bs-box-shadow-inset: inset 0 1px 2px rgba(0,0,0,.075); }" +
+      " .btn { box-shadow: var(--bs-box-shadow-sm); }" +
+      " .card { box-shadow: var(--bs-box-shadow); }"
+  };
+
   // ── live <style> injection ────────────────────────────────────────────────
 
   function getLiveStyleEl() {
@@ -99,18 +144,25 @@
       }
     });
 
+    // Properties checkboxes — collect which flags are currently checked
+    var enabledProps = {};
+    document.querySelectorAll("input[type=checkbox][name=enabled_properties]").forEach(function(cb) {
+      if (cb.value) enabledProps[cb.value] = cb.checked;
+    });
+
     return {
       primaryColor: primaryPicker ? primaryPicker.value : null,
       fontFamily:   fontSelect    ? fontSelect.value    : "",
       rootVars:     rootVars,
       ruleMap:      ruleMap,
+      enabledProps: enabledProps,
       customCss:    cssTA ? cssTA.value : ""
     };
   }
 
   // ── CSS builder ───────────────────────────────────────────────────────────
 
-  function buildCss(primaryColor, fontFamily, rootVars, ruleMap, customCss) {
+  function buildCss(primaryColor, fontFamily, rootVars, ruleMap, enabledProps, customCss) {
     var parts = [];
 
     // @import for Google Font
@@ -197,6 +249,18 @@
       }
     });
 
+    // Bootstrap $enable-* property overrides
+    if (enabledProps) {
+      Object.keys(PROPERTY_DEFAULTS).forEach(function(name) {
+        var isEnabled = (name in enabledProps) ? enabledProps[name] : PROPERTY_DEFAULTS[name];
+        if (!isEnabled && DISABLED_CSS[name]) {
+          parts.push(DISABLED_CSS[name]);
+        } else if (isEnabled && !PROPERTY_DEFAULTS[name] && ENABLED_CSS[name]) {
+          parts.push(ENABLED_CSS[name]);
+        }
+      });
+    }
+
     if (customCss) {
       parts.push(customCss);
     }
@@ -209,7 +273,7 @@
   function applyLive() {
     var v = getFormValues();
     if (v.fontFamily) loadGoogleFont(v.fontFamily);
-    getLiveStyleEl().textContent = buildCss(v.primaryColor, v.fontFamily, v.rootVars, v.ruleMap, v.customCss);
+    getLiveStyleEl().textContent = buildCss(v.primaryColor, v.fontFamily, v.rootVars, v.ruleMap, v.enabledProps, v.customCss);
     var preview = document.getElementById("palette-generated-css");
     if (preview) { preview.value = getLiveStyleEl().textContent; }
   }
@@ -267,6 +331,11 @@
     if (resetBtn) {
       resetBtn.addEventListener("click", function() { window.location.reload(); });
     }
+
+    // Properties checkboxes — wire change → applyLive (pat-checklist re-fires change events)
+    form.querySelectorAll("input[type=checkbox][name=enabled_properties]").forEach(function(cb) {
+      cb.addEventListener("change", function() { applyLive(); });
+    });
 
     // Generic: all data-css-var and data-css-selector inputs (except those handled above)
     var specificIds = {
