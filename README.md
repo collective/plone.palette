@@ -1,129 +1,150 @@
-# plone.palette 🚀
+# plone.palette
 
-[![Built with Cookieplone](https://img.shields.io/badge/built%20with-Cookieplone-0083be.svg?logo=cookiecutter)](https://github.com/plone/cookieplone-templates/)
-[![Black code style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![PyPI](https://img.shields.io/pypi/v/plone.palette.svg)](https://pypi.org/project/plone.palette)
+[![Python Versions](https://img.shields.io/pypi/pyversions/plone.palette.svg)](https://pypi.org/project/plone.palette)
+[![License](https://img.shields.io/pypi/l/plone.palette.svg)](https://github.com/collective/plone.palette/blob/main/backend/LICENSE.md)
 [![Backend Tests](https://github.com/collective/plone.palette/actions/workflows/backend.yml/badge.svg)](https://github.com/collective/plone.palette/actions/workflows/backend.yml)
 
-Theming tool for plone.app.theming
+A through-the-web (TTW) theming customizer for Plone Classic UI.
 
-## Quick Start 🏁
+`plone.palette` lets site managers adjust Bootstrap 5 design tokens — colors, typography, borders, shadows, and more — without editing SCSS or restarting the server.
+Changes are stored in the Plone registry and injected at runtime as CSS custom properties via `plone.app.theming`.
 
-### Prerequisites ✅
+## Features
 
--   An [operating system](https://6.docs.plone.org/install/create-project-cookieplone.html#prerequisites-for-installation) that runs all the requirements mentioned.
--   [uv](https://6.docs.plone.org/install/create-project-cookieplone.html#uv)
--   [Make](https://6.docs.plone.org/install/create-project-cookieplone.html#make)
--   [Git](https://6.docs.plone.org/install/create-project-cookieplone.html#git)
--   [Docker](https://docs.docker.com/get-started/get-docker/) (optional)
+- **Bootstrap 5 color palette** — customize the six semantic colors (primary, secondary, success, danger, warning, info) with live preview.
+- **Typography** — set body font size, font weight, line height, body/heading colors, and background color.
+- **Google Fonts** — pick any Google Font from a built-in vocabulary (optionally fetched live via a Google Fonts API key).
+- **Borders and shadows** — adjust border width, color, and all border-radius sizes (sm, lg, xl, xxl), plus three box-shadow presets.
+- **Navbar and footer** — override Barceloneta's navbar background and footer background/text colors.
+- **Plone UI colors** — control portlet hover backgrounds, bullet colors, and link colors on dark/grey backgrounds.
+- **Workflow state colors** — configure the colors used for draft, pending, private, internal, and internally-published states.
+- **Bootstrap properties** — toggle fourteen `$enable-*` flags (rounded corners, shadows, transitions, smooth scroll, RFS, and more) via checkboxes.
+- **Custom CSS** — append arbitrary CSS that is merged into the generated stylesheet.
+- **Offcanvas customizer** — a floating sidebar panel available to site managers on every page, powered by `pat-inject` for instant save-and-preview.
 
+## Requirements
 
-### Installation 🔧
+- Plone 6.2
+- Python 3.10 or later
+- `plone.app.theming` (included with Plone Classic UI / Barceloneta)
 
-1.  Clone this repository, then change your working directory.
+## Installation
 
-    ```shell
-    git clone git@github.com:collective/plone.palette.git
-    cd plone.palette
-    ```
-
-2.  Install this code base.
-
-    ```shell
-    make install
-    ```
-
-
-### Fire Up the Servers 🔥
-
-1.  Create a new Plone site on your first run.
-
-    ```shell
-    make backend-create-site
-    ```
-
-2.  Start the backend at http://localhost:8080/.
-
-    ```shell
-    make backend-start
-    ```
-
-Voila! Your Plone site should be live and kicking! 🎉
-
-### Local Stack Deployment 📦
-
-Deploy a local Docker Compose environment that includes the following.
-
-- Docker image for Backend 🖼️
-- A stack with a Traefik router and a PostgreSQL database 🗃️
-- Accessible at [http://plone.palette.localhost](http://plone.palette.localhost) 🌐
-
-Run the following commands in a shell session.
+Install `plone.palette` into your Plone backend.
 
 ```shell
-make stack-create-site
-make stack-start
+pip install plone.palette
 ```
 
-And... you're all set! Your Plone site is up and running locally! 🚀
+Activate the add-on through the Plone control panel under **Add-ons**, or run the GenericSetup profile programmatically:
 
-## Project structure 🏗️
+```python
+from plone import api
+api.portal.run_setup(profile_id="plone.palette:default")
+```
 
-This monorepo consists of the following distinct sections:
+### Development installation
 
-- **backend**: Houses the API and Plone installation, utilizing pip instead of buildout, and includes a policy package named plone.palette.
-- **devops**: Encompasses Docker stack, Ansible playbooks, and cache settings.
-- **docs**: Scaffold for writing documentation for your project.
-
-### Why this structure? 🤔
-
-- All necessary codebases to run the site are contained within the repository (excluding existing add-ons for Plone).
-- Specific GitHub Workflows are triggered based on changes in each codebase (refer to .github/workflows).
-- Simplifies the creation of Docker images for each codebase.
-- Demonstrates Plone installation/setup without buildout.
-
-## Code quality assurance 🧐
-
-To check your code against quality standards, run the following shell command.
+Clone the monorepo and install the backend in development mode.
 
 ```shell
-make check
+git clone git@github.com:collective/plone.palette.git
+cd plone.palette/backend
+make install
+make create-site
+make start
 ```
 
-### Format the codebase
+The Plone backend will be available at `http://localhost:8080/`.
 
-To format and rewrite the code base, ensuring it adheres to quality standards, run the following shell command.
+## Usage
+
+### Offcanvas customizer
+
+After installation, any user with the **Manage portal** permission sees a floating toggle button on the right edge of every page.
+Clicking it opens an offcanvas panel with all theming controls grouped into tabs:
+
+- **Colors** — Bootstrap semantic colors and Plone UI colors.
+- **Typography** — font family (Google Fonts), size, weight, and line height.
+- **Borders** — border width, color, and radius presets.
+- **Shadows** — three box-shadow definitions.
+- **Navbar & Footer** — background and text colors for the site chrome.
+- **States** — workflow state indicator colors.
+- **Properties** — Bootstrap `$enable-*` feature flags.
+- **Custom CSS** — a raw textarea for additional rules.
+
+Clicking **Save** sends a POST request to `@@save-customizer`, which persists all values in the Plone registry and regenerates the `custom_css` field of `IThemeSettings`.
+The generated stylesheet consists of `:root { … }` CSS custom property overrides, button-variant rules, and any extra rules derived from the enabled/disabled Bootstrap property flags.
+
+### Standalone customizer view
+
+The same form is also available as a full-page view at `@@customizer` on any content object.
+
+### Google Fonts API key
+
+To populate the font selector from the live Google Fonts API instead of the built-in static list, store your API key in the registry:
+
+```python
+from plone import api
+api.portal.set_registry_record("plone.palette.google_fonts_api_key", "YOUR_KEY")
+```
+
+## Configuration reference
+
+All settings are stored under the `plone.palette.*` registry prefix.
+
+| Registry key | Type | Default | Description |
+|---|---|---|---|
+| `primary_color` | TextLine | `#0d6efd` | Bootstrap primary color |
+| `secondary_color` | TextLine | `#6c757d` | Bootstrap secondary color |
+| `success_color` | TextLine | `#198754` | Bootstrap success color |
+| `danger_color` | TextLine | `#dc3545` | Bootstrap danger color |
+| `warning_color` | TextLine | `#ffc107` | Bootstrap warning color |
+| `info_color` | TextLine | `#0dcaf0` | Bootstrap info color |
+| `body_font_size` | TextLine | `1` | Body font size in rem |
+| `google_font_family` | TextLine | `` | Google Font family name |
+| `google_fonts_api_key` | TextLine | `` | Google Fonts API key |
+| `border_width` | TextLine | `1` | Border width in px |
+| `border_color` | TextLine | `#dee2e6` | Default border color |
+| `border_radius` | TextLine | `0.375` | Default border radius in rem |
+| `body_color` | TextLine | `#212529` | Body text color |
+| `body_bg` | TextLine | `#ffffff` | Body background color |
+| `heading_color` | TextLine | `#212529` | Heading text color |
+| `navbar_bg` | TextLine | `#007bb1` | Barceloneta navbar background |
+| `footer_bg` | TextLine | `#212529` | Footer background color |
+| `footer_color` | TextLine | `#dee2e6` | Footer text color |
+| `enabled_properties` | List | (see below) | Bootstrap `$enable-*` flags |
+| `custom_css` | Text | `` | Additional CSS appended to the generated sheet |
+
+The default enabled Bootstrap properties are: `enable_caret`, `enable_rounded`, `enable_transitions`, `enable_reduced_motion`, `enable_smooth_scroll`, `enable_grid_classes`, `enable_container_classes`, `enable_button_pointers`, `enable_rfs`, `enable_validation_icons`, and `enable_negative_margins`.
+
+## Contributing
+
+- [Issue tracker](https://github.com/collective/plone.palette/issues)
+- [Source code](https://github.com/collective/plone.palette/)
+
+### Code quality
 
 ```shell
-make format
+make lint     # check code style
+make format   # auto-format code
 ```
 
-| Section | Tool | Description | Configuration |
-| --- | --- | --- | --- |
-| backend | Ruff | Python code formatting, imports sorting  | [`backend/pyproject.toml`](./backend/pyproject.toml) |
-| backend | `zpretty` | XML and ZCML formatting  | -- |
+| Tool | Scope | Configuration |
+|---|---|---|
+| Ruff | Python formatting and import sorting | [`pyproject.toml`](./pyproject.toml) |
+| zpretty | XML and ZCML formatting | — |
 
-### Linting the codebase
-or `lint`:
-
- ```shell
-make lint
-```
-
-| Section | Tool | Description | Configuration |
-| --- | --- | --- | --- |
-| backend | Ruff | Checks code formatting, imports sorting  | [`backend/pyproject.toml`](./backend/pyproject.toml) |
-| backend | Pyroma | Checks Python package metadata  | -- |
-| backend | check-python-versions | Checks Python version information  | -- |
-| backend | `zpretty` | Checks XML and ZCML formatting  | -- |
-
-## Internationalization 🌐
-
-Generate translation files for Plone with ease:
+### Internationalization
 
 ```shell
 make i18n
 ```
 
-## Credits and acknowledgements 🙏
+Translation files are located under `src/plone/palette/locales/`.
 
-Generated using [Cookieplone (1.0.0)](https://github.com/plone/cookieplone) and [cookieplone-templates (e723d2d)](https://github.com/plone/cookieplone-templates/commit/e723d2d7bea1025300c58cd81a402cf995517756) on 2026-05-29 12:09:47.015448. A special thanks to all contributors and supporters!
+## License
+
+This project is licensed under the GNU General Public License v2.
+See [LICENSE.GPL](./LICENSE.GPL) for details.

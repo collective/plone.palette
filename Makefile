@@ -8,14 +8,6 @@ SHELL:=bash
 MAKEFLAGS+=--warn-undefined-variables
 MAKEFLAGS+=--no-builtin-rules
 
-CURRENT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-GIT_FOLDER=$(CURRENT_DIR)/.git
-
-PROJECT_NAME=plone.palette
-STACK_NAME=plone-theminghelper-example-com
-
-PLONE_VERSION=$(shell cat backend/version.txt)
-
 # We like colors
 # From: https://coderwall.com/p/izxssa/colored-makefile-for-golang-projects
 RED=`tput setaf 1`
@@ -23,8 +15,31 @@ GREEN=`tput setaf 2`
 RESET=`tput sgr0`
 YELLOW=`tput setaf 3`
 
-.PHONY: all
-all: install
+IMAGE_NAME_PREFIX=ghcr.io/collective/plone.palette
+IMAGE_TAG=latest
+
+# Python checks
+UV?=uv
+
+# installed?
+ifeq (, $(shell which $(UV) ))
+  $(error "UV=$(UV) not found in $(PATH)")
+endif
+
+PLONE_SITE_ID=Plone
+BACKEND_FOLDER=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+PLONE_VERSION=$(shell cat $(BACKEND_FOLDER)/version.txt)
+EXAMPLE_CONTENT_FOLDER=${BACKEND_FOLDER}/src/plone/palette/setuphandlers/examplecontent
+
+VENV_FOLDER=$(BACKEND_FOLDER)/.venv
+export VIRTUAL_ENV=$(VENV_FOLDER)
+BIN_FOLDER=$(VENV_FOLDER)/bin
+
+# Environment variables to be exported
+export PYTHONWARNINGS := ignore
+export DOCKER_BUILDKIT := 1
+
+all: build
 
 # Add the following 'help' target to your Makefile
 # And add help text after each target name starting with '\#\#'
@@ -32,114 +47,109 @@ all: install
 help: ## This help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-###########################################
-# Backend
-###########################################
-.PHONY: backend-install
-backend-install:  ## Create virtualenv and install Plone
-	$(MAKE) -C "./backend/" install
-	$(MAKE) backend-create-site
+requirements-mxdev.txt: pyproject.toml mx.ini ## Generate constraints file
+	@echo "$(GREEN)==> Generate constraints file$(RESET)"
+	@echo '-c https://dist.plone.org/release/$(PLONE_VERSION)/constraints.txt' > requirements.txt
+	@uvx mxdev -c mx.ini
 
-.PHONY: backend-build
-backend-build:  ## Build Backend
-	$(MAKE) -C "./backend/" install
+$(VENV_FOLDER): requirements-mxdev.txt ## Install dependencies
+	@echo "$(GREEN)==> Install environment$(RESET)"
+ifdef CI
+	@uv venv $(VENV_FOLDER)
+else
+	@uv venv --python=3.12 $(VENV_FOLDER)
+endif
+	@uv pip install -r requirements-mxdev.txt
 
-.PHONY: backend-create-site
-backend-create-site: ## Create a Plone site with default content
-	$(MAKE) -C "./backend/" create-site
+.PHONY: sync
+sync: $(VENV_FOLDER) ## Sync project dependencies
+	@echo "$(GREEN)==> Sync project dependencies$(RESET)"
+	@uv pip install -r requirements-mxdev.txt
 
-.PHONY: backend-update-example-content
-backend-update-example-content: ## Export example content inside package
-	$(MAKE) -C "./backend/" update-example-content
+instance/etc/zope.ini instance/etc/zope.conf: instance.yaml ## Create instance configuration
+	@echo "$(GREEN)==> Create instance configuration$(RESET)"
+	@uvx cookiecutter -f --no-input -c 2.4.1 --config-file instance.yaml gh:plone/cookiecutter-zope-instance
 
-.PHONY: backend-start
-backend-start: ## Start Plone Backend
-	$(MAKE) -C "./backend/" start
+.PHONY: config
+config: instance/etc/zope.ini
 
-.PHONY: backend-test
-backend-test:  ## Test backend codebase
-	@echo "Test backend"
-	$(MAKE) -C "./backend/" test
-
-###########################################
-# Environment
-###########################################
 .PHONY: install
-install:  ## Install
-	@echo "Install Backend"
-	$(MAKE) backend-install
+install: $(VENV_FOLDER) config ## Install Plone and dependencies
 
 .PHONY: clean
-clean:  ## Clean installation
-	@echo "Clean installation"
-	$(MAKE) -C "./backend/" clean
+clean: ## Clean installation and instance
+	@echo "$(RED)==> Cleaning environment and build$(RESET)"
+	@rm -rf $(VENV_FOLDER) pyvenv.cfg .installed.cfg instance/etc .venv .pytest_cache .ruff_cache constraints* requirements*
 
-###########################################
+.PHONY: remove-data
+remove-data: ## Remove all content
+	@echo "$(RED)==> Removing all content$(RESET)"
+	rm -rf $(VENV_FOLDER) instance/var
+
+.PHONY: start
+start: $(VENV_FOLDER) instance/etc/zope.ini ## Start a Plone instance on localhost:8080
+	@$(BIN_FOLDER)/runwsgi instance/etc/zope.ini
+
+.PHONY: console
+console: $(VENV_FOLDER) instance/etc/zope.ini ## Start a console into a Plone instance
+	@$(BIN_FOLDER)/zconsole debug instance/etc/zope.conf
+
+.PHONY: create-site
+create-site: $(VENV_FOLDER) instance/etc/zope.ini ## Create a new site from scratch
+	@$(BIN_FOLDER)/zconsole run instance/etc/zope.conf ./scripts/create_site.py
+
+# Example Content
+.PHONY: update-example-content
+update-example-content: $(VENV_FOLDER) ## Export example content inside package
+	@echo "$(GREEN)==> Export example content into $(EXAMPLE_CONTENT_FOLDER) $(RESET)"
+	if [ -d $(EXAMPLE_CONTENT_FOLDER)/content ]; then rm -r $(EXAMPLE_CONTENT_FOLDER)/* ;fi
+	@$(BIN_FOLDER)/plone-exporter instance/etc/zope.conf $(PLONE_SITE_ID) $(EXAMPLE_CONTENT_FOLDER)
+
 # QA
-###########################################
-.PHONY: format
-format:  ## Format codebase
-	@echo "Format the codebase"
-	$(MAKE) -C "./backend/" format
-
 .PHONY: lint
-lint:  ## Format codebase
-	@echo "Lint the codebase"
-	$(MAKE) -C "./backend/" lint
+lint: ## Check and fix code base according to Plone standards
+	@echo "$(GREEN)==> Lint codebase$(RESET)"
+	@uvx ruff@latest check --fix --config $(BACKEND_FOLDER)/pyproject.toml
+	@uvx pyroma@latest -d .
+	@uvx check-python-versions@latest .
+	@uvx zpretty@latest --check src
 
-.PHONY: check
-check:  format lint ## Lint and Format codebase
+.PHONY: format
+format: ## Check and fix code base according to Plone standards
+	@echo "$(GREEN)==> Format codebase$(RESET)"
+	@uvx ruff@latest check --select I --fix --config $(BACKEND_FOLDER)/pyproject.toml
+	@uvx ruff@latest format --config $(BACKEND_FOLDER)/pyproject.toml
+	@uvx zpretty@latest -i src
 
-###########################################
 # i18n
-###########################################
 .PHONY: i18n
-i18n:  ## Update locales
-	@echo "Update locales"
-	$(MAKE) -C "./backend/" i18n
+i18n: $(VENV_FOLDER) ## Update locales
+	@echo "$(GREEN)==> Updating locales$(RESET)"
+	@$(BIN_FOLDER)/python -m plone.palette.locales
 
-###########################################
-# Testing
-###########################################
+# Tests
 .PHONY: test
-test:  backend-test ## Test codebase
+test: $(VENV_FOLDER) ## run tests
+	@$(BIN_FOLDER)/pytest
 
-###########################################
-# Container images
-###########################################
-.PHONY: build-images
-build-images:  ## Build container images
-	@echo "Build"
-	$(MAKE) -C "./backend/" build-image
+.PHONY: test-coverage
+test-coverage: $(VENV_FOLDER) ## run tests with coverage
+	@$(BIN_FOLDER)/pytest --cov=plone.palette --cov-report term-missing
 
-###########################################
-# Local Stack
-###########################################
-.PHONY: stack-create-site
-stack-create-site:  ## Local Stack: Create a new site
-	@echo "Create a new site in the local Docker stack"
-	@echo "(Stack must not be running already.)"
-	PLONE_VERSION=$(PLONE_VERSION) docker compose -f docker-compose.yml run --build backend ./docker-entrypoint.sh create-site
+# Build Docker images
+.PHONY: build-image
+build-image:  ## Build Docker Images
+	@docker build . -t $(IMAGE_NAME_PREFIX)-backend:$(IMAGE_TAG) -f Dockerfile --build-arg PLONE_VERSION=$(PLONE_VERSION)
 
-.PHONY: stack-start
-stack-start:  ## Local Stack: Start Services
-	@echo "Start local Docker stack"
-	PLONE_VERSION=$(PLONE_VERSION) docker compose -f docker-compose.yml up -d --build
-	@echo "Now visit: http://plone.palette.localhost"
+# Acceptance tests
+.PHONY: acceptance-backend-start
+acceptance-backend-start: ## Start backend acceptance server
+	ZSERVER_HOST=0.0.0.0 ZSERVER_PORT=55001 LISTEN_PORT=55001 APPLY_PROFILES="plone.palette:default" CONFIGURE_PACKAGES="plone.palette" $(BIN_FOLDER)/robot-server plone.app.robotframework.testing.PLONE_ROBOT_TESTING
 
-.PHONY: stack-status
-stack-status:  ## Local Stack: Check Status
-	@echo "Check the status of the local Docker stack"
-	@docker compose -f docker-compose.yml ps
+.PHONY: acceptance-image-build
+acceptance-image-build:  ## Build Docker Images
+	@docker build . -t $(IMAGE_NAME_PREFIX)-backend-acceptance:$(IMAGE_TAG) -f Dockerfile.acceptance --build-arg PLONE_VERSION=$(PLONE_VERSION)
 
-.PHONY: stack-stop
-stack-stop:  ##  Local Stack: Stop Services
-	@echo "Stop local Docker stack"
-	@docker compose -f docker-compose.yml stop
-
-.PHONY: stack-rm
-stack-rm:  ## Local Stack: Remove Services and Volumes
-	@echo "Remove local Docker stack"
-	@docker compose -f docker-compose.yml down
-	@echo "Remove local volume data"
-	@docker volume rm $(PROJECT_NAME)_vol-site-data
+## Add bobtemplates features (check bobtemplates.plone's documentation to get the list of available features)
+add: $(VENV_FOLDER)
+	@uvx plonecli add $(filter-out $@,$(MAKECMDGOALS))
