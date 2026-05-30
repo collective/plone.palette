@@ -4,7 +4,7 @@ dynamic = ["version"]
 description = "Theming tool for plone.app.theming"
 readme = "README.md"
 license = "GPL-2.0-only"
-requires-python = ">=3.12"
+requires-python = ">=3.10"
 authors = [
     { name = "faro76", email = "roland.fasching@gmail.com" },
 ]

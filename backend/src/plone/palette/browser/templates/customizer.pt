@@ -470,7 +470,7 @@
                     class="pat-code-editor"
                     rows="400"
                     placeholder=":root {&#10;  /* additional overrides */&#10;}"
-                    data-pat-code-editor="language: css; theme: dark"
+                    data-pat-code-editor="language: css;"
                     tal:content="view/custom_css"></textarea>
         </div>
 

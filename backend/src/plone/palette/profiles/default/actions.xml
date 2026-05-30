@@ -8,7 +8,7 @@
        collective.sidebar renders this category in the "Actions" section.
        The <property name="modal"> value is passed verbatim as
        data-pat-plone-modal, giving the link class="pat-plone-modal". -->
-  <object name="object" meta_type="CMF Action Category" purge="false">
+  <object name="site_actions" meta_type="CMF Action Category" purge="false">
 
     <object name="palette_customizer" meta_type="CMF Action"
             i18n:domain="plone.palette">

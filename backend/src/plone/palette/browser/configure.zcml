@@ -12,7 +12,7 @@
       />
   <browser:jbot
       directory="overrides"
-      layer="plone.palette.interfaces.IBrowserLayer"
+      layer="plone.palette.interfaces.IPaletteLayer"
       />
 
   <!-- Publish static files at /++plone++plone.palette/ -->
@@ -28,7 +28,7 @@
       for="*"
       class=".customizer.CustomizerView"
       permission="cmf.ManagePortal"
-      layer="plone.palette.interfaces.IBrowserLayer"
+      layer="plone.palette.interfaces.IPaletteLayer"
       />
 
   <!-- @@palette-save: POST endpoint, returns JSON -->
@@ -37,7 +37,7 @@
       for="*"
       class=".customizer.SaveCustomizerView"
       permission="cmf.ManagePortal"
-      layer="plone.palette.interfaces.IBrowserLayer"
+      layer="plone.palette.interfaces.IPaletteLayer"
       />
 
   <!-- Viewlet: injects offcanvas HTML into IPortalTop for managers -->
@@ -46,7 +46,7 @@
       manager="plone.app.layout.viewlets.interfaces.IPortalTop"
       class=".customizer.CustomizerViewlet"
       permission="cmf.ManagePortal"
-      layer="plone.palette.interfaces.IBrowserLayer"
+      layer="plone.palette.interfaces.IPaletteLayer"
       />
 
 </configure>
