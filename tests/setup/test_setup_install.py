@@ -7,7 +7,7 @@ class TestSetupInstall:
         assert installer.is_product_installed(PACKAGE_NAME) is True
 
     def test_browserlayer(self, browser_layers):
-        """Test that IBrowserLayer is registered."""
+        """Test that IPaletteLayer is registered."""
         from plone.palette.interfaces import IPaletteLayer
 
         assert IPaletteLayer in browser_layers

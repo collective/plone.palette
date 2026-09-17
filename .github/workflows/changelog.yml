@@ -24,7 +24,10 @@ jobs:
         with:
           filters: |
             backend:
-              - 'backend/**'
+              - 'src/**'
+              - 'tests/**'
+              - 'news/**'
+              - 'pyproject.toml'
             repository:
               - '.github/**'
               - '.vscode/**'
@@ -54,7 +57,7 @@ jobs:
           # compare the current branch with the base branch.
           # Source: https://github.com/actions/checkout/#fetch-all-branches.
           git fetch --no-tags origin ${BASE_BRANCH}
-          towncrier check  --compare-with origin/${{ env.BASE_BRANCH }} --config backend/pyproject.toml --dir backend/
+          towncrier check  --compare-with origin/${{ env.BASE_BRANCH }} --config pyproject.toml --dir .
 
   repository:
     if: ${{ needs.config.outputs.repository == 'true' }}

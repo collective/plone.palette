@@ -1,6 +1,14 @@
-<configure xmlns="http://namespaces.zope.org/zope">
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    >
 
   <include package="plone.patternslib" />
-  <include package="plonetheme.bootstrap6" />
+
+  <!-- Optional: plone.palette[bootstrap6] -->
+  <include
+      package="plonetheme.bootstrap6"
+      zcml:condition="installed plonetheme.bootstrap6"
+      />
 
 </configure>

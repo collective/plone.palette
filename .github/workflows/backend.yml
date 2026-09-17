@@ -21,7 +21,7 @@ on:
       working-directory:
         required: false
         type: string
-        default: backend
+        default: "."
 
 jobs:
 

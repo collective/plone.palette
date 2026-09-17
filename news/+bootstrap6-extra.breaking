@@ -1,0 +1,1 @@
+`plonetheme.bootstrap6` is no longer a hard dependency. It moved to the `bootstrap6` extra (`pip install "plone.palette[bootstrap6]"`) and its ZCML is only included when the package is installed; the palette drives Barceloneta on its own. Sites that relied on the theme being pulled in implicitly need the extra.

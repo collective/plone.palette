@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<registry>
+
+  <!-- The palette's own records.  IThemeSettings.custom_css is left in
+       place on purpose: it belongs to plone.app.theming, and dropping it
+       would change the site's look at the moment the add-on is removed. -->
+  <records
+      interface="plone.palette.interfaces.IPaletteSettings"
+      prefix="plone.palette"
+      remove="true"
+      />
+
+  <!-- The customizer.js bundle from registry/resources.xml -->
+  <records
+      interface="Products.CMFPlone.interfaces.IBundleRegistry"
+      prefix="plone.bundles/plone-palette"
+      remove="true"
+      />
+
+</registry>

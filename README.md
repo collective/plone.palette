@@ -37,6 +37,14 @@ Install `plone.palette` into your Plone backend.
 pip install plone.palette
 ```
 
+The customizer works with Barceloneta out of the box. To theme a site running
+[plonetheme.bootstrap6](https://github.com/collective/plonetheme.bootstrap6)
+install the extra, which pulls the theme in and registers it:
+
+```shell
+pip install "plone.palette[bootstrap6]"
+```
+
 Activate the add-on through the Plone control panel under **Add-ons**, or run the GenericSetup profile programmatically:
 
 ```python
@@ -47,11 +55,12 @@ api.portal.run_setup(profile_id="plone.palette:default")
 
 ### Development installation
 
-Clone the monorepo and install the backend in development mode.
+Clone the repository and install it in development mode. `mx.ini` checks
+`plonetheme.bootstrap6` out from git so both themes can be tested.
 
 ```shell
 git clone git@github.com:collective/plone.palette.git
-cd plone.palette/backend
+cd plone.palette
 make install
 make create-site
 make start
@@ -63,8 +72,8 @@ The Plone backend will be available at `http://localhost:8080/`.
 
 ### Offcanvas customizer
 
-After installation, any user with the **Manage portal** permission sees a floating toggle button on the right edge of every page.
-Clicking it opens an offcanvas panel with all theming controls grouped into tabs:
+After installation, any user with the **Manage portal** permission gets a **Theming** entry in the Plone toolbar.
+It opens an offcanvas panel with all theming controls grouped into tabs:
 
 - **Colors** — Bootstrap semantic colors and Plone UI colors.
 - **Typography** — font family (Google Fonts), size, weight, and line height.
@@ -75,12 +84,15 @@ Clicking it opens an offcanvas panel with all theming controls grouped into tabs
 - **Properties** — Bootstrap `$enable-*` feature flags.
 - **Custom CSS** — a raw textarea for additional rules.
 
-Clicking **Save** sends a POST request to `@@save-customizer`, which persists all values in the Plone registry and regenerates the `custom_css` field of `IThemeSettings`.
+Changes preview live and are saved automatically: each change POSTs to `@@palette-save`, which persists the values in the Plone registry and regenerates the `custom_css` field of `IThemeSettings`.
 The generated stylesheet consists of `:root { … }` CSS custom property overrides, button-variant rules, and any extra rules derived from the enabled/disabled Bootstrap property flags.
+Every custom property is emitted under its Bootstrap 5 name (`--bs-primary`, read by Barceloneta) and its Bootstrap 6 name (`--primary-base`, read by plonetheme.bootstrap6), so one stylesheet serves both themes.
+
+**Reset to defaults** puts every setting back to its default and clears the generated stylesheet, which returns the site to the theme's stock look.
 
 ### Standalone customizer view
 
-The same form is also available as a full-page view at `@@customizer` on any content object.
+The same form is also available as a full-page view at `@@palette-customizer` on any content object.
 
 ### Google Fonts API key
 

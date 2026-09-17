@@ -16,23 +16,35 @@ keywords = [
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Environment :: Web Environment",
-    "Framework :: Plone","Framework :: Plone :: 6.2",
+    "Framework :: Plone",
+    "Framework :: Plone :: 6.2",
     "Framework :: Plone :: Addon",
     "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
     "Operating System :: OS Independent",
-    "Programming Language :: Python","Programming Language :: Python :: 3.12",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
     "Products.CMFPlone==6.2.1",
     "plone.api",
     "plone.classicui",
     "plone.patternslib",
-    "plonetheme.bootstrap6",
     "plone.app.caching",
     "z3c.jbot",
 ]
 
 [project.optional-dependencies]
+# The palette drives Barceloneta on its own; plonetheme.bootstrap6 is
+# optional and its ZCML is only included when the package is installed.
+# The explicit pre-release lower bound is what lets pip resolve it while
+# the theme has no final release.
+bootstrap6 = [
+    "plonetheme.bootstrap6>=1.0.0a1",
+]
 test = [
     "horse-with-no-namespace",
     "plone.app.testing",
@@ -114,7 +126,8 @@ name = "Tests"
 showcontent = true
 
 [tool.ruff]
-target-version = "py312"
+# lowest Python Plone 6.2 supports, so pyupgrade never emits newer syntax
+target-version = "py310"
 line-length = 88
 fix = true
 lint.select = [
