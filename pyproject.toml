@@ -23,10 +23,11 @@ classifiers = [
     "Programming Language :: Python","Programming Language :: Python :: 3.12",
 ]
 dependencies = [
-    "Products.CMFPlone==6.2.0",
+    "Products.CMFPlone==6.2.1",
     "plone.api",
     "plone.classicui",
     "plone.patternslib",
+    "plonetheme.bootstrap6",
     "plone.app.caching",
     "z3c.jbot",
 ]

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<object>
+
+  <!-- Toolbar: the "Theming" entry sits below the content views. -->
+  <order manager="plone.toolbar"
+         skinname="*"
+  >
+    <viewlet name="plone.contentviews" />
+    <viewlet name="plone.palette.toolbar" />
+  </order>
+
+</object>

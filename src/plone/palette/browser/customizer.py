@@ -5,6 +5,8 @@ from plone.registry.interfaces import IRegistry
 from Products.Five.browser import BrowserView
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from zope.component import getUtility
+from zope.component import queryUtility
+from zope.schema.interfaces import IVocabularyFactory
 
 import logging
 
@@ -140,6 +142,84 @@ _ENABLED_CSS = {
 }
 
 
+# plonetheme.bootstrap6 is built on Bootstrap 6, which dropped the --bs- prefix
+# and renamed the semantic tokens.  Its own --bs-* declarations are *one-way*
+# aliases kept for legacy Mockup components (--bs-primary: var(--primary-base)),
+# so a stylesheet that only writes --bs-* names has no effect on that theme —
+# nothing reads them back.  Mapping every declaration onto its Bootstrap 6 name
+# as well keeps one generated stylesheet working on Barceloneta and bootstrap6
+# alike; the extra declarations are inert on whichever theme is not active.
+#
+# --primary-base is the one to set for the brand colour: the theme derives
+# --primary-bg, --link-color, --navbar-bg and every .btn-primary token from it
+# (hover shades included, via oklch()), so no per-button rules are needed.
+# Radii map onto Bootstrap 6's numeric scale, matching the Bootstrap 5 default
+# each step corresponds to (sm .25 → radius-3, base .375 → radius-4, ...).
+BOOTSTRAP6_ALIASES = {
+    "--bs-primary": "--primary-base",
+    "--bs-secondary": "--secondary-bg",
+    "--bs-success": "--success-bg",
+    "--bs-danger": "--danger-bg",
+    "--bs-warning": "--warning-bg",
+    "--bs-info": "--info-bg",
+    "--bs-link-color": "--link-color",
+    "--bs-link-hover-color": "--link-hover-color",
+    "--bs-body-bg": "--bg-body",
+    "--bs-body-color": "--fg-body",
+    "--bs-heading-color": "--heading-color",
+    "--bs-body-font-family": "--body-font-family",
+    "--bs-body-font-size": "--body-font-size",
+    "--bs-body-font-weight": "--body-font-weight",
+    "--bs-body-line-height": "--body-line-height",
+    "--bs-border-color": "--border-color",
+    "--bs-border-width": "--border-width",
+    "--bs-border-radius": "--radius-4",
+    "--bs-border-radius-sm": "--radius-3",
+    "--bs-border-radius-lg": "--radius-5",
+    "--bs-border-radius-xl": "--radius-8",
+    "--bs-border-radius-xxl": "--radius-9",
+    "--bs-box-shadow": "--box-shadow",
+    "--bs-box-shadow-sm": "--box-shadow-sm",
+    "--bs-box-shadow-lg": "--box-shadow-lg",
+}
+
+
+def _navbar_rules(color):
+    """Navbar background for both themes.
+
+    Barceloneta reads --bs-navbar-background off .navbar-barceloneta.  The
+    bootstrap6 theme paints the bar in three places, all defaulting to
+    var(--primary-base): the --navbar-bg token on .navbar-bootstrap6, the
+    #mainnavigation-wrapper band behind it, and the offcanvas panel the nav
+    collapses into.  Miss any of them and the picked colour only shows at the
+    edges of the bar.
+    """
+    return [
+        f".navbar-barceloneta {{ --bs-navbar-background: {color}; }}",
+        f".navbar-bootstrap6 {{ --navbar-bg: {color}; }}",
+        # #mainnavigation-wrapper exists in both themes, so scope it by the
+        # bootstrap6 navbar it wraps — Barceloneta paints the bar through its
+        # own token above and must not be touched here.  The offcanvas rule is
+        # three classes deep because the theme's own rule is, and a shallower
+        # selector loses to it.
+        "#mainnavigation-wrapper:has(.navbar-bootstrap6),"
+        " .navbar-bootstrap6 .offcanvas .offcanvas-header,"
+        " .navbar-bootstrap6 .offcanvas .offcanvas-body"
+        f" {{ background-color: {color}; }}",
+    ]
+
+
+def _root_declarations(pairs):
+    """Render (css_var, value) pairs, each followed by its Bootstrap 6 alias."""
+    lines = []
+    for css_var, value in pairs:
+        lines.append(f"  {css_var}: {value};")
+        alias = BOOTSTRAP6_ALIASES.get(css_var)
+        if alias:
+            lines.append(f"  {alias}: {value};")
+    return lines
+
+
 def _hex_to_rgb(hex_color):
     h = hex_color.lstrip("#")
     if len(h) == 3:
@@ -158,7 +238,12 @@ def _darken(hex_color, amount=0.1):
 def generate_css(colors, custom_css="", body_font_size=None, enabled_properties=None,
                  plone_colors=None, google_font_family=None,
                  extra_root_vars=None, extra_css_rules=None):
-    """Build Bootstrap 5 CSS variable overrides for colors, typography and properties."""
+    """Build CSS custom property overrides for colors, typography and properties.
+
+    Declarations are emitted under both the Bootstrap 5 (--bs-*) and the
+    Bootstrap 6 names, so the result applies to Barceloneta and to
+    plonetheme.bootstrap6 — see BOOTSTRAP6_ALIASES.
+    """
     import_lines = []
     root_vars = []
     btn_rules = []
@@ -170,12 +255,12 @@ def generate_css(colors, custom_css="", body_font_size=None, enabled_properties=
             f"@import url('https://fonts.googleapis.com/css2"
             f"?family={family_param}:ital,wght@0,300;0,400;0,700;1,400&display=swap');"
         )
-        root_vars.append(f"  --bs-body-font-family: '{google_font_family}', sans-serif;")
+        root_vars.append(("--bs-body-font-family", f"'{google_font_family}', sans-serif"))
 
     if body_font_size:
         try:
             float(body_font_size)
-            root_vars.append(f"  --bs-body-font-size: {body_font_size}rem;")
+            root_vars.append(("--bs-body-font-size", f"{body_font_size}rem"))
         except (ValueError, TypeError):
             pass
 
@@ -183,12 +268,12 @@ def generate_css(colors, custom_css="", body_font_size=None, enabled_properties=
     if plone_colors:
         for css_var, color in plone_colors.items():
             if color and color.startswith("#"):
-                root_vars.append(f"  {css_var}: {color};")
+                root_vars.append((css_var, color))
 
     if extra_root_vars:
         for css_var, value in extra_root_vars.items():
             if value:
-                root_vars.append(f"  {css_var}: {value};")
+                root_vars.append((css_var, value))
 
     for name in COLOR_FIELDS:
         color = colors.get(name, "")
@@ -202,14 +287,14 @@ def generate_css(colors, custom_css="", body_font_size=None, enabled_properties=
         hover = _darken(color)
 
         root_vars += [
-            f"  --bs-{name}: {color};",
-            f"  --bs-{name}-rgb: {rgb_str};",
+            (f"--bs-{name}", color),
+            (f"--bs-{name}-rgb", rgb_str),
         ]
         if name == "primary":
             root_vars += [
-                f"  --bs-link-color: {color};",
-                f"  --bs-link-color-rgb: {rgb_str};",
-                f"  --bs-link-hover-color: {hover};",
+                ("--bs-link-color", color),
+                ("--bs-link-color-rgb", rgb_str),
+                ("--bs-link-hover-color", hover),
             ]
 
         btn_rules += [
@@ -222,7 +307,7 @@ def generate_css(colors, custom_css="", body_font_size=None, enabled_properties=
             f"  --bs-btn-active-border-color: {hover};",
             f"  --bs-btn-disabled-bg: {color};",
             f"  --bs-btn-disabled-border-color: {color};",
-            f"}}",
+            "}",
         ]
 
     # Bootstrap property overrides
@@ -244,7 +329,9 @@ def generate_css(colors, custom_css="", body_font_size=None, enabled_properties=
     parts = []
     parts.extend(import_lines)
     if root_vars:
-        parts.append(":root {\n" + "\n".join(root_vars) + "\n}")
+        parts.append(
+            ":root {\n" + "\n".join(_root_declarations(root_vars)) + "\n}"
+        )
     parts.extend(btn_rules)
     parts.extend(extra_rules)
     if custom_css:
@@ -253,7 +340,24 @@ def generate_css(colors, custom_css="", body_font_size=None, enabled_properties=
 
 
 class _CustomizerMixin:
-    """Shared read properties for view and viewlet."""
+    """Shared read properties for view and viewlets."""
+
+    # The customizer form itself, as a macro: rendered both by the standalone
+    # @@palette-customizer page and by the offcanvas in the toolbar viewlet.
+    form_template = ViewPageTemplateFile("templates/customizer_form.pt")
+
+    @property
+    def google_fonts_terms(self):
+        """Returns [(value, title), ...] for the font select box."""
+        factory = queryUtility(IVocabularyFactory, name="plone.palette.GoogleFonts")
+        if factory is None:
+            return [("", "— system default —")]
+        try:
+            vocab = factory(self.context)
+            return [(t.value, t.title) for t in vocab]
+        except Exception:
+            _log.warning("Could not load Google Fonts vocabulary")
+            return [("", "— system default —")]
 
     def _get_color(self, name):
         try:
@@ -416,7 +520,7 @@ class _CustomizerMixin:
         extra_css_rules = []
         nb = self._get_field("navbar_bg", "#007bb1")
         if nb:
-            extra_css_rules.append(f".navbar-barceloneta {{ --bs-navbar-background: {nb}; }}")
+            extra_css_rules.extend(_navbar_rules(nb))
         fb = self._get_field("footer_bg", "#212529")
         fc = self._get_field("footer_color", "#dee2e6")
         if fb or fc:
@@ -441,21 +545,6 @@ class CustomizerView(_CustomizerMixin, BrowserView):
 
     def __call__(self):
         return self.index()
-
-    @property
-    def google_fonts_terms(self):
-        """Returns [(value, title), ...] for the font select box."""
-        from zope.component import queryUtility
-        from zope.schema.interfaces import IVocabularyFactory
-        factory = queryUtility(IVocabularyFactory, name="plone.palette.GoogleFonts")
-        if factory is None:
-            return [("", "— system default —")]
-        try:
-            vocab = factory(self.context)
-            return [(t.value, t.title) for t in vocab]
-        except Exception:
-            _log.warning("Could not load Google Fonts vocabulary")
-            return [("", "— system default —")]
 
 
 class SaveCustomizerView(BrowserView):
@@ -564,7 +653,7 @@ class SaveCustomizerView(BrowserView):
             else:
                 api.portal.set_registry_record("plone.palette.navbar_bg", nb)
             if nb:
-                extra_css_rules.append(f".navbar-barceloneta {{ --bs-navbar-background: {nb}; }}")
+                extra_css_rules.extend(_navbar_rules(nb))
 
             fb = (form.get("footer_bg") or "").strip()
             if not fb:
@@ -642,6 +731,34 @@ class CustomizerViewlet(_CustomizerMixin, ViewletBase):
     @property
     def available(self):
         return api.user.has_permission("Manage portal", obj=self.context)
+
+    def render(self):
+        if not self.available:
+            return ""
+        return self.index()
+
+
+class CustomizerToolbarViewlet(_CustomizerMixin, ViewletBase):
+    """The "Theming" entry in the Plone toolbar plus the customizer it opens.
+
+    Registered in the ``plone.toolbar`` viewlet manager (IToolbar), which wraps
+    its viewlets in the toolbar's own ``<ul>`` — so the template renders an
+    ``<li>`` next to Contents/Edit/Actions, and the offcanvas it toggles.  This
+    replaces the site_actions entry the customizer used to be reached through:
+    no portal_actions round trip, no modal, and the form is already in the page
+    so customizer.js can preview live.
+    """
+
+    index = ViewPageTemplateFile("templates/customizer_toolbar.pt")
+
+    @property
+    def available(self):
+        if not api.user.has_permission("Manage portal", obj=self.context):
+            return False
+        # The standalone view renders the same form (same element ids); don't
+        # emit a second copy behind it.
+        published = self.request.get("PUBLISHED", None)
+        return getattr(published, "__name__", "") != "palette-customizer"
 
     def render(self):
         if not self.available:

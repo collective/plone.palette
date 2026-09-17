@@ -1,0 +1,1 @@
+Move the theme customizer from a `portal_actions` site action into the Plone toolbar: a "Theming" entry rendered by the `plone.palette.toolbar` viewlet (`plone.toolbar` / `IToolbar` manager) opens the customizer in an offcanvas, with the form already in the page instead of ajax-loaded into a modal.

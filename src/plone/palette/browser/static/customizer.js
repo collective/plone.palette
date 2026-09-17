@@ -38,6 +38,47 @@
       .map(function(n) { return n.toString(16).padStart(2, "0"); }).join("");
   }
 
+  // ── Bootstrap 6 token aliases (mirrors BOOTSTRAP6_ALIASES in customizer.py) ──
+  // plonetheme.bootstrap6 runs on Bootstrap 6, which dropped the --bs- prefix.
+  // Its --bs-* declarations are one-way aliases for legacy Mockup components,
+  // so a preview that only writes --bs-* names changes nothing there. Every
+  // declaration is emitted under both names; the surplus one is inert.
+
+  var BOOTSTRAP6_ALIASES = {
+    "--bs-primary": "--primary-base",
+    "--bs-secondary": "--secondary-bg",
+    "--bs-success": "--success-bg",
+    "--bs-danger": "--danger-bg",
+    "--bs-warning": "--warning-bg",
+    "--bs-info": "--info-bg",
+    "--bs-link-color": "--link-color",
+    "--bs-link-hover-color": "--link-hover-color",
+    "--bs-body-bg": "--bg-body",
+    "--bs-body-color": "--fg-body",
+    "--bs-heading-color": "--heading-color",
+    "--bs-body-font-family": "--body-font-family",
+    "--bs-body-font-size": "--body-font-size",
+    "--bs-body-font-weight": "--body-font-weight",
+    "--bs-body-line-height": "--body-line-height",
+    "--bs-border-color": "--border-color",
+    "--bs-border-width": "--border-width",
+    "--bs-border-radius": "--radius-4",
+    "--bs-border-radius-sm": "--radius-3",
+    "--bs-border-radius-lg": "--radius-5",
+    "--bs-border-radius-xl": "--radius-8",
+    "--bs-border-radius-xxl": "--radius-9",
+    "--bs-box-shadow": "--box-shadow",
+    "--bs-box-shadow-sm": "--box-shadow-sm",
+    "--bs-box-shadow-lg": "--box-shadow-lg"
+  };
+
+  // Push "  <var>: <val>;" plus its Bootstrap 6 alias, if there is one.
+  function pushDecl(lines, cssVar, value) {
+    lines.push("  " + cssVar + ": " + value + ";");
+    var alias = BOOTSTRAP6_ALIASES[cssVar];
+    if (alias) { lines.push("  " + alias + ": " + value + ";"); }
+  }
+
   // ── Bootstrap property CSS maps (mirrors Python _DISABLED_CSS / _ENABLED_CSS) ──
   // Keyed by $enable-* flag name. Applied in buildCss when a checkbox is toggled.
 
@@ -133,8 +174,10 @@
     });
 
     // Inputs with data-css-selector → scoped rules
+    // (navbar is special-cased below: the two themes paint the bar differently)
     var ruleMap = {};
     document.querySelectorAll("[data-css-selector]").forEach(function(el) {
+      if (el.id === "th-navbar-bg") return;
       var sel  = el.getAttribute("data-css-selector");
       var prop = el.getAttribute("data-css-prop");
       var val  = el.value;
@@ -150,7 +193,10 @@
       if (cb.value) enabledProps[cb.value] = cb.checked;
     });
 
+    var navbarPicker = document.getElementById("th-navbar-bg");
+
     return {
+      navbarBg:     navbarPicker ? navbarPicker.value : "",
       primaryColor: primaryPicker ? primaryPicker.value : null,
       fontFamily:   fontSelect    ? fontSelect.value    : "",
       rootVars:     rootVars,
@@ -162,7 +208,7 @@
 
   // ── CSS builder ───────────────────────────────────────────────────────────
 
-  function buildCss(primaryColor, fontFamily, rootVars, ruleMap, enabledProps, customCss) {
+  function buildCss(primaryColor, fontFamily, rootVars, ruleMap, enabledProps, customCss, navbarBg) {
     var parts = [];
 
     // @import for Google Font
@@ -177,14 +223,14 @@
     // :root block
     var rootLines = [];
     if (fontFamily) {
-      rootLines.push("  --bs-body-font-family: '" + fontFamily + "', sans-serif;");
+      pushDecl(rootLines, "--bs-body-font-family", "'" + fontFamily + "', sans-serif");
     }
     // rootVars from data-css-var inputs (everything except primary)
     Object.keys(rootVars).forEach(function(cssVar) {
       if (cssVar === "--bs-primary") return; // primary handled below
       var val = rootVars[cssVar];
       if (val !== "" && val !== null) {
-        rootLines.push("  " + cssVar + ": " + val + ";");
+        pushDecl(rootLines, cssVar, val);
       }
     });
     // primary color vars
@@ -193,12 +239,12 @@
       if (rgb) {
         var rgbStr = rgb.r + ", " + rgb.g + ", " + rgb.b;
         var hover  = darken(primaryColor);
+        pushDecl(rootLines, "--bs-primary", primaryColor);
+        pushDecl(rootLines, "--bs-link-color", primaryColor);
+        pushDecl(rootLines, "--bs-link-hover-color", hover);
         rootLines.push(
-          "  --bs-primary: " + primaryColor + ";",
           "  --bs-primary-rgb: " + rgbStr + ";",
-          "  --bs-link-color: " + primaryColor + ";",
           "  --bs-link-color-rgb: " + rgbStr + ";",
-          "  --bs-link-hover-color: " + hover + ";",
           "  --plone-link-color: " + primaryColor + ";",
           "  --plone-link-hover-color: " + hover + ";"
         );
@@ -238,6 +284,20 @@
       }
     }
 
+    // Navbar — mirrors _navbar_rules() in customizer.py. Barceloneta reads a
+    // token off .navbar-barceloneta; bootstrap6 paints the bar in three places,
+    // and missing any of them leaves the colour showing only at the edges.
+    if (navbarBg) {
+      parts.push(
+        ".navbar-barceloneta { --bs-navbar-background: " + navbarBg + "; }",
+        ".navbar-bootstrap6 { --navbar-bg: " + navbarBg + "; }",
+        "#mainnavigation-wrapper:has(.navbar-bootstrap6),"
+        + " .navbar-bootstrap6 .offcanvas .offcanvas-header,"
+        + " .navbar-bootstrap6 .offcanvas .offcanvas-body"
+        + " { background-color: " + navbarBg + "; }"
+      );
+    }
+
     // Scoped selector rules from data-css-selector inputs
     Object.keys(ruleMap).forEach(function(sel) {
       var props = ruleMap[sel];
@@ -273,7 +333,7 @@
   function applyLive() {
     var v = getFormValues();
     if (v.fontFamily) loadGoogleFont(v.fontFamily);
-    getLiveStyleEl().textContent = buildCss(v.primaryColor, v.fontFamily, v.rootVars, v.ruleMap, v.enabledProps, v.customCss);
+    getLiveStyleEl().textContent = buildCss(v.primaryColor, v.fontFamily, v.rootVars, v.ruleMap, v.enabledProps, v.customCss, v.navbarBg);
     var preview = document.getElementById("palette-generated-css");
     if (preview) { preview.value = getLiveStyleEl().textContent; }
   }

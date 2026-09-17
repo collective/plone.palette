@@ -40,6 +40,17 @@
       layer="plone.palette.interfaces.IPaletteLayer"
       />
 
+  <!-- Toolbar entry "Theming" + the customizer offcanvas it opens.
+       plone.toolbar is the IToolbar viewlet manager rendered by
+       plone.app.layout's toolbar.pt, inside <ul class="plone-toolbar-main">. -->
+  <browser:viewlet
+      name="plone.palette.toolbar"
+      manager="plone.app.layout.viewlets.interfaces.IToolbar"
+      class=".customizer.CustomizerToolbarViewlet"
+      permission="cmf.ManagePortal"
+      layer="plone.palette.interfaces.IPaletteLayer"
+      />
+
   <!-- Viewlet: injects offcanvas HTML into IPortalTop for managers -->
   <browser:viewlet
       name="plone.palette.customizer"
