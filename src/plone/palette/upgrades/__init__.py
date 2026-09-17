@@ -1,4 +1,8 @@
 from plone import api
+from plone.app.theming.interfaces import IThemeSettings
+from plone.palette.browser.customizer import regenerate_css
+from plone.registry.interfaces import IRegistry
+from zope.component import getUtility
 
 import logging
 
@@ -18,3 +22,21 @@ def remove_customizer_action(setup_tool=None):
     if category is not None and "palette_customizer" in category.objectIds():
         category.manage_delObjects(["palette_customizer"])
         _log.info("Removed the palette_customizer site action.")
+
+
+def regenerate_theme_css(setup_tool=None):
+    """Re-derive the stylesheet so it carries the Bootstrap 6 token names.
+
+    Sites customized before the aliases existed have a custom_css written in
+    --bs-* names only, which plonetheme.bootstrap6 ignores; nothing fixes that
+    until somebody saves the customizer again.  Skipped when the stylesheet is
+    empty: that site never customized, and generating from the defaults would
+    paint it Bootstrap blue instead of leaving the theme's stock look.
+    """
+    registry = getUtility(IRegistry)
+    settings = registry.forInterface(IThemeSettings, False)
+    if not settings.custom_css:
+        _log.info("No generated stylesheet to regenerate; skipping.")
+        return
+    regenerate_css()
+    _log.info("Regenerated the theme stylesheet from the plone.palette records.")

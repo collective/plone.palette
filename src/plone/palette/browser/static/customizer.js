@@ -386,10 +386,26 @@
       cssTA.addEventListener("input", function() { applyLive(); });
     }
 
-    // Reset button
+    // Reset: restore every setting server-side, then reload so the inputs
+    // repopulate from the (now default) registry. Confirm first — it is
+    // destructive and cannot be undone.
     var resetBtn = document.getElementById("palette-reset-btn");
     if (resetBtn) {
-      resetBtn.addEventListener("click", function() { window.location.reload(); });
+      resetBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        if (!window.confirm(
+            "Reset all theme settings (colors, fonts, borders, properties and " +
+            "custom CSS) to their defaults? This cannot be undone.")) {
+          return;
+        }
+        var body = new FormData();
+        body.append("form.button.reset", "reset");
+        var auth = form.querySelector('input[name="_authenticator"]');
+        if (auth) body.append("_authenticator", auth.value);
+        fetch(form.getAttribute("action"), { method: "POST", body: body, credentials: "same-origin" })
+          .then(function () { window.location.reload(); })
+          .catch(function () { window.location.reload(); });
+      });
     }
 
     // Properties checkboxes — wire change → applyLive (pat-checklist re-fires change events)
@@ -431,7 +447,10 @@
       }
     });
 
-    applyLive();
+    // No initial applyLive(): the saved stylesheet is already linked in the
+    // page, and the form is on every page for managers now. Previewing on
+    // load would paint the form's defaults over a freshly reset site, so the
+    // preview starts with the first change instead.
   }
 
   // ── boot ──────────────────────────────────────────────────────────────────

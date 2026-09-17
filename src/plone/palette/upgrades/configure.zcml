@@ -33,6 +33,18 @@
         />
   </genericsetup:upgradeSteps>
 
+  <genericsetup:upgradeSteps
+      profile="plone.palette:default"
+      source="1001"
+      destination="1002"
+      >
+    <genericsetup:upgradeStep
+        title="Regenerate the theme stylesheet"
+        description="Adds the Bootstrap 6 token names to an existing generated stylesheet."
+        handler=".regenerate_theme_css"
+        />
+  </genericsetup:upgradeSteps>
+
   <!-- -*- extra stuff goes here -*- -->
 
 </configure>

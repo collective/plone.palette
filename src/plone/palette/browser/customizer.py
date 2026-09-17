@@ -1,11 +1,14 @@
+from datetime import datetime
 from plone import api
 from plone.app.layout.viewlets.common import ViewletBase
 from plone.app.theming.interfaces import IThemeSettings
+from plone.palette.interfaces import IPaletteSettings
 from plone.registry.interfaces import IRegistry
 from Products.Five.browser import BrowserView
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from zope.component import getUtility
 from zope.component import queryUtility
+from zope.schema import getFields
 from zope.schema.interfaces import IVocabularyFactory
 
 import logging
@@ -624,6 +627,48 @@ class _CustomizerMixin:
         )
 
 
+def regenerate_css():
+    """Write ``IThemeSettings.custom_css`` from the ``plone.palette.*`` records.
+
+    The records are only the seed; the CSS visitors get is derived from them.
+    Anything that writes records without the form — an upgrade step, a site
+    provisioning script — has to call this, or the site keeps rendering the
+    previous stylesheet until somebody opens the customizer and saves.  The
+    save view ends with it too, so there is exactly one derivation.
+    """
+    css = _CustomizerMixin().generated_css
+    _write_theme_css(css)
+    return css
+
+
+def reset_to_defaults():
+    """Put every ``IPaletteSettings`` record back to its schema default and
+    drop the generated stylesheet.
+
+    Clearing ``custom_css`` (rather than regenerating from the defaults) is
+    what returns the site to the *theme's* stock look: the palette defaults
+    are Bootstrap's, and Barceloneta's primary is not Bootstrap blue.  This is
+    also the state a fresh install is in.  ``google_fonts_api_key`` is
+    configuration, not design, and is left alone.
+    """
+    for name, field in getFields(IPaletteSettings).items():
+        if name == "google_fonts_api_key":
+            continue
+        value = field.default
+        if value is None:
+            value = field.defaultFactory() if field.defaultFactory else ""
+        api.portal.set_registry_record(f"plone.palette.{name}", value)
+    _write_theme_css("")
+
+
+def _write_theme_css(css):
+    registry = getUtility(IRegistry)
+    settings = registry.forInterface(IThemeSettings, False)
+    settings.custom_css = css
+    # plone.app.theming keys @@custom.css's Last-Modified off this
+    settings.custom_css_timestamp = datetime.now()
+
+
 class CustomizerView(_CustomizerMixin, BrowserView):
     """Renders the TTW Theming form inside the Plone main template."""
 
@@ -633,8 +678,37 @@ class CustomizerView(_CustomizerMixin, BrowserView):
         return self.index()
 
 
+# Records the save loop writes only when the form carries a value, so a
+# partial autosubmit never blanks one.  Colour fields must look like a hex
+# colour, body_font_size like a number; anything else is stored as posted.
+_COLOR_RECORDS = frozenset(
+    [f"{name}_color" for name in COLOR_FIELDS]
+    + [fn for fn, *_ in PLONE_UI_COLOR_FIELDS + STATE_COLOR_FIELDS]
+    + [fn for fn, *_ in BORDER_COLOR_FIELDS_EXTRA + TYPOGRAPHY_COLOR_FIELDS_EXTRA]
+    + ["navbar_bg", "footer_bg", "footer_color"]
+)
+_VALUE_RECORDS = frozenset(
+    [fn for fn, *_ in BORDER_NUMBER_FIELDS + SHADOW_TEXT_FIELDS + TYPOGRAPHY_VAR_FIELDS]
+    + ["body_font_size"]
+)
+
+
+def _is_number(value):
+    try:
+        float(value)
+    except (TypeError, ValueError):
+        return False
+    return True
+
+
 class SaveCustomizerView(BrowserView):
-    """POST endpoint for pat-inject: saves colors + custom CSS, returns HTML feedback."""
+    """POST endpoint for pat-inject: writes the posted records, then derives
+    the stylesheet from the registry (regenerate_css).
+
+    ``form.button.reset`` instead restores every record to its default and
+    clears the stylesheet; the JS reloads the page afterwards so the form
+    repopulates.
+    """
 
     def __call__(self):
         response = self.request.response
@@ -645,201 +719,42 @@ class SaveCustomizerView(BrowserView):
 
         form = self.request.form
         try:
-            colors = {}
-            for name in COLOR_FIELDS:
-                color = (form.get(f"{name}_color") or "").strip()
-                if color and color.startswith("#"):
-                    api.portal.set_registry_record(f"plone.palette.{name}_color", color)
-                    colors[name] = color
-                else:
-                    try:
-                        colors[name] = (
-                            api.portal.get_registry_record(
-                                f"plone.palette.{name}_color"
-                            )
-                            or COLOR_DEFAULTS[name]
-                        )
-                    except Exception:
-                        colors[name] = COLOR_DEFAULTS[name]
+            if form.get("form.button.reset"):
+                reset_to_defaults()
+                return '<div class="alert alert-info">Theme reset to defaults.</div>'
 
-            # Plone color fields
-            plone_colors = {}
-            for fn, cv, _lbl, dflt in PLONE_UI_COLOR_FIELDS + STATE_COLOR_FIELDS:
-                color = (form.get(fn) or "").strip()
-                if color and color.startswith("#"):
-                    api.portal.set_registry_record(f"plone.palette.{fn}", color)
-                else:
-                    try:
-                        color = (
-                            api.portal.get_registry_record(f"plone.palette.{fn}")
-                            or dflt
-                        )
-                    except Exception:
-                        color = dflt
-                plone_colors[cv] = color
+            for name in _COLOR_RECORDS:
+                value = (form.get(name) or "").strip()
+                if value.startswith("#"):
+                    api.portal.set_registry_record(f"plone.palette.{name}", value)
 
-            google_font_family = (form.get("google_font_family") or "").strip()
+            for name in _VALUE_RECORDS:
+                value = (form.get(name) or "").strip()
+                if not value:
+                    continue
+                if name == "body_font_size" and not _is_number(value):
+                    continue
+                api.portal.set_registry_record(f"plone.palette.{name}", value)
+
+            # These three may legitimately be emptied, so they are always written.
             api.portal.set_registry_record(
-                "plone.palette.google_font_family", google_font_family
+                "plone.palette.google_font_family",
+                (form.get("google_font_family") or "").strip(),
             )
-
-            # Border, shadow, typography-extra and navbar/footer fields
-            extra_root_vars = {}
-            for fn, cv, dflt, unit in BORDER_NUMBER_FIELDS:
-                v = (form.get(fn) or "").strip()
-                if not v:
-                    try:
-                        v = (
-                            api.portal.get_registry_record(f"plone.palette.{fn}")
-                            or dflt
-                        )
-                    except Exception:
-                        v = dflt
-                else:
-                    api.portal.set_registry_record(f"plone.palette.{fn}", v)
-                if v:
-                    extra_root_vars[cv] = v + unit
-
-            for fn, cv, dflt, unit in SHADOW_TEXT_FIELDS:
-                v = (form.get(fn) or "").strip()
-                if not v:
-                    try:
-                        v = (
-                            api.portal.get_registry_record(f"plone.palette.{fn}")
-                            or dflt
-                        )
-                    except Exception:
-                        v = dflt
-                else:
-                    api.portal.set_registry_record(f"plone.palette.{fn}", v)
-                if v:
-                    extra_root_vars[cv] = v
-
-            for fn, cv, dflt in (
-                BORDER_COLOR_FIELDS_EXTRA + TYPOGRAPHY_COLOR_FIELDS_EXTRA
-            ):
-                v = (form.get(fn) or "").strip()
-                if not v:
-                    try:
-                        v = (
-                            api.portal.get_registry_record(f"plone.palette.{fn}")
-                            or dflt
-                        )
-                    except Exception:
-                        v = dflt
-                else:
-                    api.portal.set_registry_record(f"plone.palette.{fn}", v)
-                if v:
-                    extra_root_vars[cv] = v
-
-            for fn, cv, dflt, unit in TYPOGRAPHY_VAR_FIELDS:
-                v = (form.get(fn) or "").strip()
-                if not v:
-                    try:
-                        v = (
-                            api.portal.get_registry_record(f"plone.palette.{fn}")
-                            or dflt
-                        )
-                    except Exception:
-                        v = dflt
-                else:
-                    api.portal.set_registry_record(f"plone.palette.{fn}", v)
-                if v:
-                    extra_root_vars[cv] = v
-
-            extra_css_rules = []
-            nb = (form.get("navbar_bg") or "").strip()
-            if not nb:
-                try:
-                    nb = (
-                        api.portal.get_registry_record("plone.palette.navbar_bg")
-                        or "#007bb1"
-                    )
-                except Exception:
-                    nb = "#007bb1"
-            else:
-                api.portal.set_registry_record("plone.palette.navbar_bg", nb)
-            if nb:
-                extra_css_rules.extend(_navbar_rules(nb))
-
-            fb = (form.get("footer_bg") or "").strip()
-            if not fb:
-                try:
-                    fb = (
-                        api.portal.get_registry_record("plone.palette.footer_bg")
-                        or "#212529"
-                    )
-                except Exception:
-                    fb = "#212529"
-            else:
-                api.portal.set_registry_record("plone.palette.footer_bg", fb)
-
-            fc = (form.get("footer_color") or "").strip()
-            if not fc:
-                try:
-                    fc = (
-                        api.portal.get_registry_record("plone.palette.footer_color")
-                        or "#dee2e6"
-                    )
-                except Exception:
-                    fc = "#dee2e6"
-            else:
-                api.portal.set_registry_record("plone.palette.footer_color", fc)
-
-            if fb or fc:
-                props = ""
-                if fb:
-                    props += f"  background-color: {fb};\n"
-                if fc:
-                    props += f"  color: {fc};\n"
-                extra_css_rules.append(f"#portal-footer-wrapper {{\n{props}}}")
-
-            body_font_size = (form.get("body_font_size") or "").strip()
-            if body_font_size:
-                try:
-                    float(body_font_size)
-                    api.portal.set_registry_record(
-                        "plone.palette.body_font_size", body_font_size
-                    )
-                except (ValueError, TypeError):
-                    body_font_size = None
-            if not body_font_size:
-                try:
-                    body_font_size = (
-                        api.portal.get_registry_record("plone.palette.body_font_size")
-                        or "1"
-                    )
-                except Exception:
-                    body_font_size = "1"
-
-            # Checkboxes: only checked ones are submitted; hidden sentinel ensures
-            # the key is always present so an all-unchecked state still saves correctly.
+            # Checkboxes: only checked ones are submitted; a hidden sentinel keeps
+            # the key present so an all-unchecked state still saves correctly.
             raw = form.get("enabled_properties", [])
             if isinstance(raw, str):
                 raw = [raw]
             valid_names = {name for name, _label, _default in BOOTSTRAP_PROPERTIES}
-            enabled_properties = [v for v in raw if v in valid_names]
             api.portal.set_registry_record(
-                "plone.palette.enabled_properties", enabled_properties
+                "plone.palette.enabled_properties", [v for v in raw if v in valid_names]
+            )
+            api.portal.set_registry_record(
+                "plone.palette.custom_css", (form.get("custom_css") or "").strip()
             )
 
-            custom_css = (form.get("custom_css") or "").strip()
-            api.portal.set_registry_record("plone.palette.custom_css", custom_css)
-
-            generated = generate_css(
-                colors,
-                custom_css,
-                body_font_size,
-                enabled_properties,
-                plone_colors,
-                google_font_family,
-                extra_root_vars,
-                extra_css_rules,
-            )
-            registry = getUtility(IRegistry)
-            theme_settings = registry.forInterface(IThemeSettings, False)
-            theme_settings.custom_css = generated
-
+            regenerate_css()
             return '<div class="alert alert-success">Value saved!</div>'
 
         except Exception as e:

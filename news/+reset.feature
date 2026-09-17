@@ -1,0 +1,1 @@
+Add a "Reset to defaults" button to the customizer: every `plone.palette.*` record goes back to its schema default and the generated stylesheet is cleared, which returns the site to the theme's stock look (the state of a fresh install). The Google Fonts API key is configuration, not design, and is left alone.

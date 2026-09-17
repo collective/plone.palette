@@ -14,6 +14,6 @@ class TestSetupUninstall:
 
     def test_browserlayer_not_registered(self, browser_layers):
         """Test that IBrowserLayer is not registered."""
-        from plone.palette.interfaces import IBrowserLayer
+        from plone.palette.interfaces import IPaletteLayer
 
-        assert IBrowserLayer not in browser_layers
+        assert IPaletteLayer not in browser_layers

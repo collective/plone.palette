@@ -1,0 +1,1 @@
+Fix the browser layer tests, which imported `IBrowserLayer` where the interface is named `IPaletteLayer`.

@@ -8,10 +8,10 @@ class TestSetupInstall:
 
     def test_browserlayer(self, browser_layers):
         """Test that IBrowserLayer is registered."""
-        from plone.palette.interfaces import IBrowserLayer
+        from plone.palette.interfaces import IPaletteLayer
 
-        assert IBrowserLayer in browser_layers
+        assert IPaletteLayer in browser_layers
 
     def test_latest_version(self, profile_last_version):
         """Test latest version of default profile."""
-        assert profile_last_version(f"{PACKAGE_NAME}:default") == "1001"
+        assert profile_last_version(f"{PACKAGE_NAME}:default") == "1002"

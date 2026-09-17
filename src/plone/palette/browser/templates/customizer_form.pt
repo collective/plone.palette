@@ -813,6 +813,18 @@
 
         </div><!-- /.tab-content -->
 
+        <!-- Reset: customizer.js confirms, POSTs form.button.reset to
+             @@palette-save and reloads so the inputs repopulate. -->
+        <div class="d-flex justify-content-end border-top pt-3 mt-3">
+          <button class="btn btn-outline-danger btn-sm"
+                  id="palette-reset-btn"
+                  name="form.button.reset"
+                  type="button"
+                  value="reset"
+                  i18n:translate="button_reset_theme"
+          >Reset to defaults</button>
+        </div>
+
       </form>
 
     </div><!-- /#palette-customizer-content -->
