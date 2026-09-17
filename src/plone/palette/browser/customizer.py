@@ -10,6 +10,7 @@ from zope.schema.interfaces import IVocabularyFactory
 
 import logging
 
+
 _log = logging.getLogger(__name__)
 
 COLOR_FIELDS = ("primary", "secondary", "success", "danger", "warning", "info")
@@ -17,41 +18,69 @@ COLOR_FIELDS = ("primary", "secondary", "success", "danger", "warning", "info")
 # Plone-specific color fields from _variables.colors.plone.scss
 # (field_name, css_var, label, default_hex)
 PLONE_UI_COLOR_FIELDS = (
-    ("plone_link_color_on_dark",    "--plone-link-color-on-dark",    "Link on dark bg",   "#16a1e3"),
-    ("plone_link_color_on_grey",    "--plone-link-color-on-grey",    "Link on grey bg",   "#086ca3"),
-    ("plone_portlet_list_hover_bg", "--plone-portlet-list-hover-bg", "Portlet hover bg",  "#fcfcfd"),
-    ("plone_portlet_footer_bg",     "--plone-portlet-footer-bg",     "Portlet footer bg", "#fcfcfd"),
-    ("plone_portlet_list_bullet",   "--plone-portlet-list-bullet",   "Portlet bullet",    "#64bee8"),
+    (
+        "plone_link_color_on_dark",
+        "--plone-link-color-on-dark",
+        "Link on dark bg",
+        "#16a1e3",
+    ),
+    (
+        "plone_link_color_on_grey",
+        "--plone-link-color-on-grey",
+        "Link on grey bg",
+        "#086ca3",
+    ),
+    (
+        "plone_portlet_list_hover_bg",
+        "--plone-portlet-list-hover-bg",
+        "Portlet hover bg",
+        "#fcfcfd",
+    ),
+    (
+        "plone_portlet_footer_bg",
+        "--plone-portlet-footer-bg",
+        "Portlet footer bg",
+        "#fcfcfd",
+    ),
+    (
+        "plone_portlet_list_bullet",
+        "--plone-portlet-list-bullet",
+        "Portlet bullet",
+        "#64bee8",
+    ),
 )
 
 STATE_COLOR_FIELDS = (
-    ("state_draft_color",                "--plone-state-draft",                "Draft",                "#fab82a"),
-    ("state_pending_color",              "--plone-state-pending",              "Pending",              "#ccd111"),
-    ("state_private_color",             "--plone-state-private",              "Private",              "#c4183c"),
-    ("state_internal_color",             "--plone-state-internal",             "Internal",             "#fab82a"),
-    ("state_internally_published_color", "--plone-state-internally-published", "Internally published", "#883dfa"),
+    ("state_draft_color", "--plone-state-draft", "Draft", "#fab82a"),
+    ("state_pending_color", "--plone-state-pending", "Pending", "#ccd111"),
+    ("state_private_color", "--plone-state-private", "Private", "#c4183c"),
+    ("state_internal_color", "--plone-state-internal", "Internal", "#fab82a"),
+    (
+        "state_internally_published_color",
+        "--plone-state-internally-published",
+        "Internally published",
+        "#883dfa",
+    ),
 )
 
 # (field_name, css_var, default, css_unit)  — write to :root
 BORDER_NUMBER_FIELDS = (
-    ("border_width",      "--bs-border-width",     "1",     "px"),
-    ("border_radius",     "--bs-border-radius",    "0.375", "rem"),
-    ("border_radius_sm",  "--bs-border-radius-sm", "0.25",  "rem"),
-    ("border_radius_lg",  "--bs-border-radius-lg", "0.5",   "rem"),
-    ("border_radius_xl",  "--bs-border-radius-xl", "1",     "rem"),
-    ("border_radius_xxl", "--bs-border-radius-xxl","2",     "rem"),
+    ("border_width", "--bs-border-width", "1", "px"),
+    ("border_radius", "--bs-border-radius", "0.375", "rem"),
+    ("border_radius_sm", "--bs-border-radius-sm", "0.25", "rem"),
+    ("border_radius_lg", "--bs-border-radius-lg", "0.5", "rem"),
+    ("border_radius_xl", "--bs-border-radius-xl", "1", "rem"),
+    ("border_radius_xxl", "--bs-border-radius-xxl", "2", "rem"),
 )
 SHADOW_TEXT_FIELDS = (
-    ("box_shadow",    "--bs-box-shadow",    "0 .5rem 1rem rgba(0,0,0,.15)",      ""),
+    ("box_shadow", "--bs-box-shadow", "0 .5rem 1rem rgba(0,0,0,.15)", ""),
     ("box_shadow_sm", "--bs-box-shadow-sm", "0 .125rem .25rem rgba(0,0,0,.075)", ""),
-    ("box_shadow_lg", "--bs-box-shadow-lg", "0 1rem 3rem rgba(0,0,0,.175)",      ""),
+    ("box_shadow_lg", "--bs-box-shadow-lg", "0 1rem 3rem rgba(0,0,0,.175)", ""),
 )
-BORDER_COLOR_FIELDS_EXTRA = (
-    ("border_color", "--bs-border-color", "#dee2e6"),
-)
+BORDER_COLOR_FIELDS_EXTRA = (("border_color", "--bs-border-color", "#dee2e6"),)
 TYPOGRAPHY_COLOR_FIELDS_EXTRA = (
-    ("body_color",    "--bs-body-color",    "#212529"),
-    ("body_bg",       "--bs-body-bg",       "#ffffff"),
+    ("body_color", "--bs-body-color", "#212529"),
+    ("body_bg", "--bs-body-bg", "#ffffff"),
     ("heading_color", "--bs-heading-color", "#212529"),
 )
 TYPOGRAPHY_VAR_FIELDS = (
@@ -59,38 +88,38 @@ TYPOGRAPHY_VAR_FIELDS = (
     ("body_line_height", "--bs-body-line-height", "1.5", ""),
 )
 NAVBAR_FOOTER_FIELDS = (
-    ("navbar_bg",    "#007bb1"),
-    ("footer_bg",    "#212529"),
+    ("navbar_bg", "#007bb1"),
+    ("footer_bg", "#212529"),
     ("footer_color", "#dee2e6"),
 )
 
 COLOR_DEFAULTS = {
-    "primary":   "#0d6efd",
+    "primary": "#0d6efd",
     "secondary": "#6c757d",
-    "success":   "#198754",
-    "danger":    "#dc3545",
-    "warning":   "#ffc107",
-    "info":      "#0dcaf0",
+    "success": "#198754",
+    "danger": "#dc3545",
+    "warning": "#ffc107",
+    "info": "#0dcaf0",
 }
 
 # Bootstrap $enable-* variables from _variables.properties.scss
 # (name, label, default)
 BOOTSTRAP_PROPERTIES = (
-    ("enable_caret",               "Caret on dropdowns",            True),
-    ("enable_rounded",             "Rounded corners",               True),
-    ("enable_shadows",             "Box shadows",                   False),
-    ("enable_gradients",           "Gradients on buttons",          False),
-    ("enable_transitions",         "CSS transitions",               True),
-    ("enable_reduced_motion",      "Respect reduced-motion",        True),
-    ("enable_smooth_scroll",       "Smooth scroll",                 True),
-    ("enable_grid_classes",        "Grid utility classes",          True),
-    ("enable_container_classes",   "Container classes",             True),
-    ("enable_cssgrid",             "CSS Grid layout mode",          False),
-    ("enable_button_pointers",     "Pointer cursor on buttons",     True),
-    ("enable_rfs",                 "Responsive font scaling (RFS)", True),
-    ("enable_validation_icons",    "Validation icons",              True),
-    ("enable_negative_margins",    "Negative margin utilities",     True),
-    ("enable_important_utilities", "!important on utilities",       False),
+    ("enable_caret", "Caret on dropdowns", True),
+    ("enable_rounded", "Rounded corners", True),
+    ("enable_shadows", "Box shadows", False),
+    ("enable_gradients", "Gradients on buttons", False),
+    ("enable_transitions", "CSS transitions", True),
+    ("enable_reduced_motion", "Respect reduced-motion", True),
+    ("enable_smooth_scroll", "Smooth scroll", True),
+    ("enable_grid_classes", "Grid utility classes", True),
+    ("enable_container_classes", "Container classes", True),
+    ("enable_cssgrid", "CSS Grid layout mode", False),
+    ("enable_button_pointers", "Pointer cursor on buttons", True),
+    ("enable_rfs", "Responsive font scaling (RFS)", True),
+    ("enable_validation_icons", "Validation icons", True),
+    ("enable_negative_margins", "Negative margin utilities", True),
+    ("enable_important_utilities", "!important on utilities", False),
 )
 
 # CSS injected at runtime when a property is DISABLED (i.e. not in enabled list)
@@ -115,12 +144,8 @@ _DISABLED_CSS = {
     "enable_transitions": (
         "*, *::before, *::after { transition: none !important; animation: none !important; }"
     ),
-    "enable_smooth_scroll": (
-        "html { scroll-behavior: auto !important; }"
-    ),
-    "enable_button_pointers": (
-        ".btn:not(:disabled) { cursor: default; }"
-    ),
+    "enable_smooth_scroll": ("html { scroll-behavior: auto !important; }"),
+    "enable_button_pointers": (".btn:not(:disabled) { cursor: default; }"),
     "enable_validation_icons": (
         ".form-control.is-valid, .was-validated .form-control:valid,"
         ".form-control.is-invalid, .was-validated .form-control:invalid"
@@ -235,9 +260,16 @@ def _darken(hex_color, amount=0.1):
     return f"#{r:02x}{g:02x}{b:02x}"
 
 
-def generate_css(colors, custom_css="", body_font_size=None, enabled_properties=None,
-                 plone_colors=None, google_font_family=None,
-                 extra_root_vars=None, extra_css_rules=None):
+def generate_css(
+    colors,
+    custom_css="",
+    body_font_size=None,
+    enabled_properties=None,
+    plone_colors=None,
+    google_font_family=None,
+    extra_root_vars=None,
+    extra_css_rules=None,
+):
     """Build CSS custom property overrides for colors, typography and properties.
 
     Declarations are emitted under both the Bootstrap 5 (--bs-*) and the
@@ -255,7 +287,10 @@ def generate_css(colors, custom_css="", body_font_size=None, enabled_properties=
             f"@import url('https://fonts.googleapis.com/css2"
             f"?family={family_param}:ital,wght@0,300;0,400;0,700;1,400&display=swap');"
         )
-        root_vars.append(("--bs-body-font-family", f"'{google_font_family}', sans-serif"))
+        root_vars.append((
+            "--bs-body-font-family",
+            f"'{google_font_family}', sans-serif",
+        ))
 
     if body_font_size:
         try:
@@ -329,9 +364,7 @@ def generate_css(colors, custom_css="", body_font_size=None, enabled_properties=
     parts = []
     parts.extend(import_lines)
     if root_vars:
-        parts.append(
-            ":root {\n" + "\n".join(_root_declarations(root_vars)) + "\n}"
-        )
+        parts.append(":root {\n" + "\n".join(_root_declarations(root_vars)) + "\n}")
     parts.extend(btn_rules)
     parts.extend(extra_rules)
     if custom_css:
@@ -373,21 +406,34 @@ class _CustomizerMixin:
         return {name: self._get_color(name) for name in COLOR_FIELDS}
 
     @property
-    def primary_color(self):   return self._get_color("primary")
+    def primary_color(self):
+        return self._get_color("primary")
+
     @property
-    def secondary_color(self): return self._get_color("secondary")
+    def secondary_color(self):
+        return self._get_color("secondary")
+
     @property
-    def success_color(self):   return self._get_color("success")
+    def success_color(self):
+        return self._get_color("success")
+
     @property
-    def danger_color(self):    return self._get_color("danger")
+    def danger_color(self):
+        return self._get_color("danger")
+
     @property
-    def warning_color(self):   return self._get_color("warning")
+    def warning_color(self):
+        return self._get_color("warning")
+
     @property
-    def info_color(self):      return self._get_color("info")
+    def info_color(self):
+        return self._get_color("info")
 
     def _get_plone_color(self, field_name, default):
         try:
-            return api.portal.get_registry_record(f"plone.palette.{field_name}") or default
+            return (
+                api.portal.get_registry_record(f"plone.palette.{field_name}") or default
+            )
         except Exception:
             return default
 
@@ -430,51 +476,86 @@ class _CustomizerMixin:
     @property
     def google_font_family(self):
         try:
-            return api.portal.get_registry_record("plone.palette.google_font_family") or ""
+            return (
+                api.portal.get_registry_record("plone.palette.google_font_family") or ""
+            )
         except Exception:
             return ""
 
     # Borders
     @property
-    def border_width(self): return self._get_field("border_width", "1")
+    def border_width(self):
+        return self._get_field("border_width", "1")
+
     @property
-    def border_color(self): return self._get_field("border_color", "#dee2e6")
+    def border_color(self):
+        return self._get_field("border_color", "#dee2e6")
+
     @property
-    def border_radius(self): return self._get_field("border_radius", "0.375")
+    def border_radius(self):
+        return self._get_field("border_radius", "0.375")
+
     @property
-    def border_radius_sm(self): return self._get_field("border_radius_sm", "0.25")
+    def border_radius_sm(self):
+        return self._get_field("border_radius_sm", "0.25")
+
     @property
-    def border_radius_lg(self): return self._get_field("border_radius_lg", "0.5")
+    def border_radius_lg(self):
+        return self._get_field("border_radius_lg", "0.5")
+
     @property
-    def border_radius_xl(self): return self._get_field("border_radius_xl", "1")
+    def border_radius_xl(self):
+        return self._get_field("border_radius_xl", "1")
+
     @property
-    def border_radius_xxl(self): return self._get_field("border_radius_xxl", "2")
+    def border_radius_xxl(self):
+        return self._get_field("border_radius_xxl", "2")
+
     @property
-    def box_shadow(self): return self._get_field("box_shadow", "0 .5rem 1rem rgba(0,0,0,.15)")
+    def box_shadow(self):
+        return self._get_field("box_shadow", "0 .5rem 1rem rgba(0,0,0,.15)")
+
     @property
-    def box_shadow_sm(self): return self._get_field("box_shadow_sm", "0 .125rem .25rem rgba(0,0,0,.075)")
+    def box_shadow_sm(self):
+        return self._get_field("box_shadow_sm", "0 .125rem .25rem rgba(0,0,0,.075)")
+
     @property
-    def box_shadow_lg(self): return self._get_field("box_shadow_lg", "0 1rem 3rem rgba(0,0,0,.175)")
+    def box_shadow_lg(self):
+        return self._get_field("box_shadow_lg", "0 1rem 3rem rgba(0,0,0,.175)")
 
     # Typography extras
     @property
-    def body_color(self): return self._get_field("body_color", "#212529")
+    def body_color(self):
+        return self._get_field("body_color", "#212529")
+
     @property
-    def body_bg(self): return self._get_field("body_bg", "#ffffff")
+    def body_bg(self):
+        return self._get_field("body_bg", "#ffffff")
+
     @property
-    def heading_color(self): return self._get_field("heading_color", "#212529")
+    def heading_color(self):
+        return self._get_field("heading_color", "#212529")
+
     @property
-    def body_font_weight(self): return self._get_field("body_font_weight", "400")
+    def body_font_weight(self):
+        return self._get_field("body_font_weight", "400")
+
     @property
-    def body_line_height(self): return self._get_field("body_line_height", "1.5")
+    def body_line_height(self):
+        return self._get_field("body_line_height", "1.5")
 
     # Navbar & Footer
     @property
-    def navbar_bg(self): return self._get_field("navbar_bg", "#007bb1")
+    def navbar_bg(self):
+        return self._get_field("navbar_bg", "#007bb1")
+
     @property
-    def footer_bg(self): return self._get_field("footer_bg", "#212529")
+    def footer_bg(self):
+        return self._get_field("footer_bg", "#212529")
+
     @property
-    def footer_color(self): return self._get_field("footer_color", "#dee2e6")
+    def footer_color(self):
+        return self._get_field("footer_color", "#dee2e6")
 
     @property
     def enabled_properties(self):
@@ -532,9 +613,14 @@ class _CustomizerMixin:
             extra_css_rules.append(f"#portal-footer-wrapper {{\n{props}}}")
 
         return generate_css(
-            self.colors, self.custom_css, self.body_font_size,
-            self.enabled_properties, self._all_plone_colors(),
-            self.google_font_family, extra_root_vars, extra_css_rules,
+            self.colors,
+            self.custom_css,
+            self.body_font_size,
+            self.enabled_properties,
+            self._all_plone_colors(),
+            self.google_font_family,
+            extra_root_vars,
+            extra_css_rules,
         )
 
 
@@ -563,16 +649,15 @@ class SaveCustomizerView(BrowserView):
             for name in COLOR_FIELDS:
                 color = (form.get(f"{name}_color") or "").strip()
                 if color and color.startswith("#"):
-                    api.portal.set_registry_record(
-                        f"plone.palette.{name}_color", color
-                    )
+                    api.portal.set_registry_record(f"plone.palette.{name}_color", color)
                     colors[name] = color
                 else:
                     try:
                         colors[name] = (
                             api.portal.get_registry_record(
                                 f"plone.palette.{name}_color"
-                            ) or COLOR_DEFAULTS[name]
+                            )
+                            or COLOR_DEFAULTS[name]
                         )
                     except Exception:
                         colors[name] = COLOR_DEFAULTS[name]
@@ -585,13 +670,18 @@ class SaveCustomizerView(BrowserView):
                     api.portal.set_registry_record(f"plone.palette.{fn}", color)
                 else:
                     try:
-                        color = api.portal.get_registry_record(f"plone.palette.{fn}") or dflt
+                        color = (
+                            api.portal.get_registry_record(f"plone.palette.{fn}")
+                            or dflt
+                        )
                     except Exception:
                         color = dflt
                 plone_colors[cv] = color
 
             google_font_family = (form.get("google_font_family") or "").strip()
-            api.portal.set_registry_record("plone.palette.google_font_family", google_font_family)
+            api.portal.set_registry_record(
+                "plone.palette.google_font_family", google_font_family
+            )
 
             # Border, shadow, typography-extra and navbar/footer fields
             extra_root_vars = {}
@@ -599,7 +689,10 @@ class SaveCustomizerView(BrowserView):
                 v = (form.get(fn) or "").strip()
                 if not v:
                     try:
-                        v = api.portal.get_registry_record(f"plone.palette.{fn}") or dflt
+                        v = (
+                            api.portal.get_registry_record(f"plone.palette.{fn}")
+                            or dflt
+                        )
                     except Exception:
                         v = dflt
                 else:
@@ -611,7 +704,10 @@ class SaveCustomizerView(BrowserView):
                 v = (form.get(fn) or "").strip()
                 if not v:
                     try:
-                        v = api.portal.get_registry_record(f"plone.palette.{fn}") or dflt
+                        v = (
+                            api.portal.get_registry_record(f"plone.palette.{fn}")
+                            or dflt
+                        )
                     except Exception:
                         v = dflt
                 else:
@@ -619,11 +715,16 @@ class SaveCustomizerView(BrowserView):
                 if v:
                     extra_root_vars[cv] = v
 
-            for fn, cv, dflt in BORDER_COLOR_FIELDS_EXTRA + TYPOGRAPHY_COLOR_FIELDS_EXTRA:
+            for fn, cv, dflt in (
+                BORDER_COLOR_FIELDS_EXTRA + TYPOGRAPHY_COLOR_FIELDS_EXTRA
+            ):
                 v = (form.get(fn) or "").strip()
                 if not v:
                     try:
-                        v = api.portal.get_registry_record(f"plone.palette.{fn}") or dflt
+                        v = (
+                            api.portal.get_registry_record(f"plone.palette.{fn}")
+                            or dflt
+                        )
                     except Exception:
                         v = dflt
                 else:
@@ -635,7 +736,10 @@ class SaveCustomizerView(BrowserView):
                 v = (form.get(fn) or "").strip()
                 if not v:
                     try:
-                        v = api.portal.get_registry_record(f"plone.palette.{fn}") or dflt
+                        v = (
+                            api.portal.get_registry_record(f"plone.palette.{fn}")
+                            or dflt
+                        )
                     except Exception:
                         v = dflt
                 else:
@@ -647,7 +751,10 @@ class SaveCustomizerView(BrowserView):
             nb = (form.get("navbar_bg") or "").strip()
             if not nb:
                 try:
-                    nb = api.portal.get_registry_record("plone.palette.navbar_bg") or "#007bb1"
+                    nb = (
+                        api.portal.get_registry_record("plone.palette.navbar_bg")
+                        or "#007bb1"
+                    )
                 except Exception:
                     nb = "#007bb1"
             else:
@@ -658,7 +765,10 @@ class SaveCustomizerView(BrowserView):
             fb = (form.get("footer_bg") or "").strip()
             if not fb:
                 try:
-                    fb = api.portal.get_registry_record("plone.palette.footer_bg") or "#212529"
+                    fb = (
+                        api.portal.get_registry_record("plone.palette.footer_bg")
+                        or "#212529"
+                    )
                 except Exception:
                     fb = "#212529"
             else:
@@ -667,7 +777,10 @@ class SaveCustomizerView(BrowserView):
             fc = (form.get("footer_color") or "").strip()
             if not fc:
                 try:
-                    fc = api.portal.get_registry_record("plone.palette.footer_color") or "#dee2e6"
+                    fc = (
+                        api.portal.get_registry_record("plone.palette.footer_color")
+                        or "#dee2e6"
+                    )
                 except Exception:
                     fc = "#dee2e6"
             else:
@@ -685,12 +798,17 @@ class SaveCustomizerView(BrowserView):
             if body_font_size:
                 try:
                     float(body_font_size)
-                    api.portal.set_registry_record("plone.palette.body_font_size", body_font_size)
+                    api.portal.set_registry_record(
+                        "plone.palette.body_font_size", body_font_size
+                    )
                 except (ValueError, TypeError):
                     body_font_size = None
             if not body_font_size:
                 try:
-                    body_font_size = api.portal.get_registry_record("plone.palette.body_font_size") or "1"
+                    body_font_size = (
+                        api.portal.get_registry_record("plone.palette.body_font_size")
+                        or "1"
+                    )
                 except Exception:
                     body_font_size = "1"
 
@@ -708,7 +826,16 @@ class SaveCustomizerView(BrowserView):
             custom_css = (form.get("custom_css") or "").strip()
             api.portal.set_registry_record("plone.palette.custom_css", custom_css)
 
-            generated = generate_css(colors, custom_css, body_font_size, enabled_properties, plone_colors, google_font_family, extra_root_vars, extra_css_rules)
+            generated = generate_css(
+                colors,
+                custom_css,
+                body_font_size,
+                enabled_properties,
+                plone_colors,
+                google_font_family,
+                extra_root_vars,
+                extra_css_rules,
+            )
             registry = getUtility(IRegistry)
             theme_settings = registry.forInterface(IThemeSettings, False)
             theme_settings.custom_css = generated

@@ -14,9 +14,7 @@ def toolbar(portal, http_request):
     def render():
         alsoProvides(http_request, IPaletteLayer)
         view = portal.restrictedTraverse("@@view")
-        manager = getMultiAdapter(
-            (portal, http_request, view), name="plone.toolbar"
-        )
+        manager = getMultiAdapter((portal, http_request, view), name="plone.toolbar")
         manager.update()
         return manager.render()
 

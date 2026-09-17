@@ -41,6 +41,7 @@ Activate the add-on through the Plone control panel under **Add-ons**, or run th
 
 ```python
 from plone import api
+
 api.portal.run_setup(profile_id="plone.palette:default")
 ```
 
@@ -87,6 +88,7 @@ To populate the font selector from the live Google Fonts API instead of the buil
 
 ```python
 from plone import api
+
 api.portal.set_registry_record("plone.palette.google_fonts_api_key", "YOUR_KEY")
 ```
 

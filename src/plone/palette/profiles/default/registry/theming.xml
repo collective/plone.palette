@@ -1,57 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <registry xmlns:i18n="http://xml.zope.org/namespaces/i18n"
-          i18n:domain="plone.palette">
+          i18n:domain="plone.palette"
+>
 
-  <record name="plone.palette.primary_color"
+  <record field="primary_color"
           interface="plone.palette.interfaces.IPaletteSettings"
-          field="primary_color">
+          name="plone.palette.primary_color"
+  >
     <value>#0d6efd</value>
   </record>
 
-  <record name="plone.palette.secondary_color"
+  <record field="secondary_color"
           interface="plone.palette.interfaces.IPaletteSettings"
-          field="secondary_color">
+          name="plone.palette.secondary_color"
+  >
     <value>#6c757d</value>
   </record>
 
-  <record name="plone.palette.success_color"
+  <record field="success_color"
           interface="plone.palette.interfaces.IPaletteSettings"
-          field="success_color">
+          name="plone.palette.success_color"
+  >
     <value>#198754</value>
   </record>
 
-  <record name="plone.palette.danger_color"
+  <record field="danger_color"
           interface="plone.palette.interfaces.IPaletteSettings"
-          field="danger_color">
+          name="plone.palette.danger_color"
+  >
     <value>#dc3545</value>
   </record>
 
-  <record name="plone.palette.warning_color"
+  <record field="warning_color"
           interface="plone.palette.interfaces.IPaletteSettings"
-          field="warning_color">
+          name="plone.palette.warning_color"
+  >
     <value>#ffc107</value>
   </record>
 
-  <record name="plone.palette.info_color"
+  <record field="info_color"
           interface="plone.palette.interfaces.IPaletteSettings"
-          field="info_color">
+          name="plone.palette.info_color"
+  >
     <value>#0dcaf0</value>
   </record>
 
-  <record name="plone.palette.body_font_size"
+  <record field="body_font_size"
           interface="plone.palette.interfaces.IPaletteSettings"
-          field="body_font_size">
+          name="plone.palette.body_font_size"
+  >
     <value>1</value>
   </record>
 
   <!-- Typography / Google Fonts -->
   <record name="plone.palette.google_font_family">
     <field type="plone.registry.field.TextLine"><title>Google Font family</title><required>False</required></field>
-    <value></value>
+    <value />
   </record>
   <record name="plone.palette.google_fonts_api_key">
     <field type="plone.registry.field.TextLine"><title>Google Fonts API key</title><required>False</required></field>
-    <value></value>
+    <value />
   </record>
 
   <!-- Borders -->
@@ -176,9 +184,10 @@
     <value>#883dfa</value>
   </record>
 
-  <record name="plone.palette.enabled_properties"
+  <record field="enabled_properties"
           interface="plone.palette.interfaces.IPaletteSettings"
-          field="enabled_properties">
+          name="plone.palette.enabled_properties"
+  >
     <value>
       <element>enable_caret</element>
       <element>enable_rounded</element>
@@ -195,10 +204,11 @@
     </value>
   </record>
 
-  <record name="plone.palette.custom_css"
+  <record field="custom_css"
           interface="plone.palette.interfaces.IPaletteSettings"
-          field="custom_css">
-    <value></value>
+          name="plone.palette.custom_css"
+  >
+    <value />
   </record>
 
 </registry>
