@@ -2,6 +2,7 @@ from datetime import datetime
 from plone import api
 from plone.app.layout.viewlets.common import ViewletBase
 from plone.app.theming.interfaces import IThemeSettings
+from plone.palette.interfaces import BOOTSTRAP_PROPERTIES
 from plone.palette.interfaces import IPaletteSettings
 from plone.registry.interfaces import IRegistry
 from Products.Five.browser import BrowserView
@@ -104,26 +105,6 @@ COLOR_DEFAULTS = {
     "warning": "#ffc107",
     "info": "#0dcaf0",
 }
-
-# Bootstrap $enable-* variables from _variables.properties.scss
-# (name, label, default)
-BOOTSTRAP_PROPERTIES = (
-    ("enable_caret", "Caret on dropdowns", True),
-    ("enable_rounded", "Rounded corners", True),
-    ("enable_shadows", "Box shadows", False),
-    ("enable_gradients", "Gradients on buttons", False),
-    ("enable_transitions", "CSS transitions", True),
-    ("enable_reduced_motion", "Respect reduced-motion", True),
-    ("enable_smooth_scroll", "Smooth scroll", True),
-    ("enable_grid_classes", "Grid utility classes", True),
-    ("enable_container_classes", "Container classes", True),
-    ("enable_cssgrid", "CSS Grid layout mode", False),
-    ("enable_button_pointers", "Pointer cursor on buttons", True),
-    ("enable_rfs", "Responsive font scaling (RFS)", True),
-    ("enable_validation_icons", "Validation icons", True),
-    ("enable_negative_margins", "Negative margin utilities", True),
-    ("enable_important_utilities", "!important on utilities", False),
-)
 
 # CSS injected at runtime when a property is DISABLED (i.e. not in enabled list)
 # Only properties whose effect can be replicated with CSS custom properties or

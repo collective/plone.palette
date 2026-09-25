@@ -9,6 +9,41 @@ class IPaletteLayer(IDefaultBrowserLayer):
     """Marker interface that defines a browser layer."""
 
 
+# Bootstrap $enable-* variables from _variables.properties.scss.
+# (name, label, default) — the canonical list; browser/customizer.py's
+# BOOTSTRAP_PROPERTIES and static/customizer.js's PROPERTY_DEFAULTS must be
+# kept in sync with the `default` column here.
+#
+# `default` is what a fresh install (and "Reset to defaults") should ship
+# with checked. IPaletteSettings.enabled_properties must default to exactly
+# the names with default=True below (see default_enabled_properties()) —
+# an empty-list default would make generate_css() treat every one of these
+# as explicitly disabled, since it has no way to tell "never configured"
+# apart from "user unchecked it".
+BOOTSTRAP_PROPERTIES = (
+    ("enable_caret", "Caret on dropdowns", True),
+    ("enable_rounded", "Rounded corners", True),
+    ("enable_shadows", "Box shadows", False),
+    ("enable_gradients", "Gradients on buttons", False),
+    ("enable_transitions", "CSS transitions", True),
+    ("enable_reduced_motion", "Respect reduced-motion", True),
+    ("enable_smooth_scroll", "Smooth scroll", True),
+    ("enable_grid_classes", "Grid utility classes", True),
+    ("enable_container_classes", "Container classes", True),
+    ("enable_cssgrid", "CSS Grid layout mode", False),
+    ("enable_button_pointers", "Pointer cursor on buttons", True),
+    ("enable_rfs", "Responsive font scaling (RFS)", True),
+    ("enable_validation_icons", "Validation icons", True),
+    ("enable_negative_margins", "Negative margin utilities", True),
+    ("enable_important_utilities", "!important on utilities", False),
+)
+
+
+def default_enabled_properties():
+    """defaultFactory for IPaletteSettings.enabled_properties."""
+    return [name for name, _label, default in BOOTSTRAP_PROPERTIES if default]
+
+
 class IPaletteSettings(Interface):
     """Registry settings for plone.palette."""
 
@@ -136,7 +171,7 @@ class IPaletteSettings(Interface):
         title="Enabled Bootstrap properties",
         value_type=schema.TextLine(),
         required=False,
-        defaultFactory=list,
+        defaultFactory=default_enabled_properties,
     )
 
     custom_css = schema.Text(title="Custom CSS", default="", required=False)
