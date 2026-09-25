@@ -455,7 +455,26 @@
 
   // ── boot ──────────────────────────────────────────────────────────────────
 
+  // The toolbar entry (customizer_toolbar.pt) renders the offcanvas as a
+  // sibling of the other toolbar entries, inside the Plone toolbar's own
+  // <ul class="nav ..."> — which on Barceloneta lives inside #edit-zone.
+  // Being a descendant of #edit-zone is enough for the toolbar chrome's
+  // #edit-zone .nav-link / #edit-zone .nav-tabs .nav-link rules (higher
+  // specificity than Bootstrap's own .nav-tabs .nav-link) to repaint our
+  // tabs in the toolbar's colors, no matter that the offcanvas itself is
+  // position:fixed and visually appears elsewhere. Moving the node to
+  // <body> once the toolbar has rendered it takes it out of that cascade;
+  // its data-bs-toggle wiring is id-based, so relocating it changes nothing
+  // functionally.
+  function relocateOffcanvas() {
+    var oc = document.getElementById("palette-customizer-offcanvas");
+    if (oc && oc.parentElement !== document.body) {
+      document.body.appendChild(oc);
+    }
+  }
+
   function checkAndInit() {
+    relocateOffcanvas();
     var form = document.getElementById("palette-customizer-form");
     if (form) initForm(form);
   }
