@@ -29,7 +29,7 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
-    "Products.CMFPlone==6.2.1",
+    "Products.CMFPlone>=6.2.0",
     "plone.api",
     "plone.classicui",
     "plone.patternslib",
