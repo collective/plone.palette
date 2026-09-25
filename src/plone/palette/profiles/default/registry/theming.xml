@@ -200,7 +200,6 @@
       <element>enable_rfs</element>
       <element>enable_validation_icons</element>
       <element>enable_negative_margins</element>
-      <element>enable_deprecation_messages</element>
     </value>
   </record>
 

@@ -126,7 +126,8 @@ _DISABLED_CSS = {
         " --bs-border-radius-pill: 0; }"
     ),
     "enable_transitions": (
-        "*, *::before, *::after { transition: none !important; animation: none !important; }"
+        "*, *::before, *::after {"
+        " transition: none !important; animation: none !important; }"
     ),
     "enable_smooth_scroll": ("html { scroll-behavior: auto !important; }"),
     "enable_button_pointers": (".btn:not(:disabled) { cursor: default; }"),
@@ -244,7 +245,7 @@ def _darken(hex_color, amount=0.1):
     return f"#{r:02x}{g:02x}{b:02x}"
 
 
-def generate_css(
+def generate_css(  # noqa: C901
     colors,
     custom_css="",
     body_font_size=None,
@@ -563,13 +564,13 @@ class _CustomizerMixin:
             return ""
 
     @property
-    def generated_css(self):
+    def generated_css(self):  # noqa: C901
         extra_root_vars = {}
         for fn, cv, dflt, unit in BORDER_NUMBER_FIELDS:
             v = self._get_field(fn, dflt)
             if v:
                 extra_root_vars[cv] = v + unit
-        for fn, cv, dflt, unit in SHADOW_TEXT_FIELDS:
+        for fn, cv, dflt, _unit in SHADOW_TEXT_FIELDS:
             v = self._get_field(fn, dflt)
             if v:
                 extra_root_vars[cv] = v
@@ -577,7 +578,7 @@ class _CustomizerMixin:
             v = self._get_field(fn, dflt)
             if v:
                 extra_root_vars[cv] = v
-        for fn, cv, dflt, unit in TYPOGRAPHY_VAR_FIELDS:
+        for fn, cv, dflt, _unit in TYPOGRAPHY_VAR_FIELDS:
             v = self._get_field(fn, dflt)
             if v:
                 extra_root_vars[cv] = v
@@ -696,7 +697,10 @@ class SaveCustomizerView(BrowserView):
         response.setHeader("Content-Type", "text/html; charset=utf-8")
 
         if self.request.get("REQUEST_METHOD", "GET") != "POST":
-            return '<div id="form-feedback" class="alert alert-error"><p>POST required.</p></div>'
+            return (
+                '<div id="form-feedback" class="alert alert-error">'
+                "<p>POST required.</p></div>"
+            )
 
         form = self.request.form
         try:

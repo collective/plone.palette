@@ -88,7 +88,6 @@
     enable_grid_classes: true, enable_container_classes: true,
     enable_button_pointers: true, enable_rfs: true,
     enable_validation_icons: true, enable_negative_margins: true,
-    enable_deprecation_messages: true,
     enable_shadows: false, enable_gradients: false,
     enable_cssgrid: false, enable_important_utilities: false
   };

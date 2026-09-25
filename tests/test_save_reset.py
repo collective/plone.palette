@@ -5,6 +5,7 @@ from plone.app.theming.interfaces import IThemeSettings
 from plone.palette.browser.customizer import regenerate_css
 from plone.palette.browser.customizer import reset_to_defaults
 from plone.palette.browser.customizer import SaveCustomizerView
+from plone.palette.interfaces import default_enabled_properties
 from plone.palette.upgrades import regenerate_theme_css
 from plone.registry.interfaces import IRegistry
 from zope.component import getUtility
@@ -68,7 +69,9 @@ class TestReset:
         assert "reset" in out
         assert api.portal.get_registry_record("plone.palette.primary_color") == "#0d6efd"
         assert api.portal.get_registry_record("plone.palette.custom_css") == ""
-        assert api.portal.get_registry_record("plone.palette.enabled_properties") == []
+        assert api.portal.get_registry_record(
+            "plone.palette.enabled_properties"
+        ) == default_enabled_properties()
         # clearing, not regenerating: the theme's stock look, as on a fresh install
         assert theme_css() == ""
         # configuration, not design — untouched
